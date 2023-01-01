@@ -65,7 +65,7 @@ def instruction():
                 pygame.quit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if width / 1.2 <= mouse[0] <= width / 1.2 + 140 and height / 24 <= mouse[1] <= height / 24 + 40:
-                    start_screen()
+                    return start_screen()
 
         mouse = pygame.mouse.get_pos()
 
