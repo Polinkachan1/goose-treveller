@@ -44,7 +44,17 @@ height = screen.get_height()
 
 smallfont = pygame.font.SysFont('Corbel', 35)
 
-text = smallfont.render('start', True, color)
+text_1 = smallfont.render('start', True, color)
+text_2 = smallfont.render('Instructions', True, color)
+text_3 = smallfont.render('Change Fon', True, color)
+
+
+class Instructions:
+    pass
+
+
+class Changing_Fon:
+    pass
 
 
 class Sprite(pygame.sprite.Sprite):
@@ -75,6 +85,12 @@ def start_screen():
                 # button the game is terminated
                 if width / 2.5 <= mouse[0] <= width / 2.5 + 140 and height / 1.1 <= mouse[1] <= height / 1.1 + 40:
                     return
+                elif width / 11 <= mouse[0] <= width / 11 + 140 and height / 1.1 <= mouse[1] <= height / 1.1 + 40:
+                    Instructions()
+
+                elif width / 1.5 <= mouse[0] <= width / 1.5 + 140 and height / 1.1 <= mouse[1] <= height / 1.1 + 40:
+                    Changing_Fon()
+
 
         # stores the (x,y) coordinates into
         # the variable as a tuple
@@ -86,8 +102,22 @@ def start_screen():
 
         else:
             pygame.draw.rect(screen, color_dark, [width / 2.5, height / 1.1, 140, 40])
+        # second_button Instructions
+        if width / 11 <= mouse[0] <= width / 11 + 140 and height / 1.1 <= mouse[1] <= height / 1.1 + 40:
+            pygame.draw.rect(screen, color_light, [width / 11, height / 1.1, 180, 40])
+
+        else:
+            pygame.draw.rect(screen, color_dark, [width / 11, height / 1.1, 180, 40])
+        # third-button Change Fon
+        if width / 1.5 <= mouse[0] <= width / 1.5 + 140 and height / 1.1 <= mouse[1] <= height / 1.1 + 40:
+            pygame.draw.rect(screen, color_light, [width / 1.5, height / 1.1, 180, 40])
+
+        else:
+            pygame.draw.rect(screen, color_dark, [width / 1.5, height / 1.1, 180, 40])
         # superimposing the text onto our button
-        screen.blit(text, (width / 2.5 + 40, height / 1.1))
+        screen.blit(text_1, (width / 2.5 + 40, height / 1.1))  # first button
+        screen.blit(text_2, (width / 11 + 10, height / 1.1))  # second button
+        screen.blit(text_3, (width / 1.5 + 5, height / 1.1))  # third button
         # updates the frames of the game
         pygame.display.update()
 
