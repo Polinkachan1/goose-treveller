@@ -22,7 +22,7 @@ player = None
 
 step = 10
 FPS = 60
-width = 800
+width = 1000
 height = 800
 screen = pygame.display.set_mode((width, height))
 pygame.display.set_caption("Goose-adventurer")
@@ -43,10 +43,15 @@ width = screen.get_width()
 height = screen.get_height()
 
 smallfont = pygame.font.SysFont('Corbel', 35)
-
+# texts for start_screen()
 text_1 = smallfont.render('Start', True, color)
 text_2 = smallfont.render('Instruction', True, color)
 text_3 = smallfont.render('Choose level', True, color)
+
+# texts for change_level
+text_lev_1 = smallfont.render('level №1', True, color)
+text_lev_2 = smallfont.render('level №2', True, color)
+text_lev_3 = smallfont.render('level №3', True, color)
 
 
 def instruction():
@@ -54,8 +59,59 @@ def instruction():
     screen.blit(fon, (0, 0))
 
 
-class Choose_level:
-    pass
+def wrong_message():
+    fon = pygame.transform.scale(load_image('wrong_message.png'), (width, height))
+    screen.blit(fon, (0, 0))
+    is_running = True
+    while is_running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                is_running = False
+        pygame.display.update()
+
+def change_level():
+    fon = pygame.transform.scale(load_image('picker_level.jpg'), (width, height))
+    screen.blit(fon, (0, 0))
+    is_running = True
+    while is_running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                is_running = False
+            # checks if a mouse is clicked
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if width / 2.5 <= mouse[0] <= width / 2.5 + 200 and height / 2 <= mouse[1] <= height / 2 + 60:
+                    # need to add first level
+                    return wrong_message()
+                elif width / 2.5 <= mouse[0] <= width / 2.5 + 200 and height / 3.5 <= mouse[1] <= height / 3.5 + 60:
+                    #  need to add second level
+                    return wrong_message()
+                elif width / 2.5 <= mouse[0] <= width / 2.5 + 200 and height / 2.5 <= mouse[1] <= height / 2.5 + 60:
+                    #  need to add third level
+                    return wrong_message()
+
+        mouse = pygame.mouse.get_pos()
+        if width / 2.5 <= mouse[0] <= width / 2.5 + 200 and height / 2 <= mouse[1] <= height / 2 + 60:
+            pygame.draw.rect(screen, color_light, [width / 2.5, height / 2, 200, 60])
+        else:
+            pygame.draw.rect(screen, color_dark, [width / 2.5, height / 2, 200, 60])
+
+        # second_button Instructions
+        if width / 2.5 <= mouse[0] <= width / 2.5 + 200 and height / 3.5 <= mouse[1] <= height / 3.5 + 60:
+            pygame.draw.rect(screen, color_light, [width / 2.5, height / 3.5, 200, 60])
+        else:
+            pygame.draw.rect(screen, color_dark, [width / 2.5, height / 3.5, 200, 60])
+
+        # third-button Change Fon
+        if width / 2.5 <= mouse[0] <= width / 2.5 + 200 and height / 2.5 <= mouse[1] <= height / 2.5 + 60:
+            pygame.draw.rect(screen, color_light, [width / 2.5, height / 2.5, 200, 60])
+
+        else:
+            pygame.draw.rect(screen, color_dark, [width / 2.5, height / 2.5, 200, 60])
+        # superimposing the text onto our button
+        screen.blit(text_lev_3, (width / 2.5 + 20, height / 2 + 10))  # third button
+        screen.blit(text_lev_1, (width / 2.5 + 20, height / 3.5 + 10))  # first button
+        screen.blit(text_lev_2, (width / 2.5 + 20, height / 2.5 + 10))  # second button
+        pygame.display.update()
 
 
 class Sprite(pygame.sprite.Sprite):
@@ -90,8 +146,7 @@ def start_screen():
                     instruction()
 
                 elif width / 1.5 <= mouse[0] <= width / 1.5 + 140 and height / 1.1 <= mouse[1] <= height / 1.1 + 40:
-                    Choose_level()
-
+                    return change_level()
         # stores the (x,y) coordinates into
         # the variable as a tuple
         mouse = pygame.mouse.get_pos()
