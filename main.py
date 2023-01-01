@@ -18,7 +18,7 @@ def load_image(name: str):
 
 pygame.init()
 
-player = None
+guess = None
 
 step = 10
 FPS = 60
@@ -48,6 +48,7 @@ text_1 = smallfont.render('Start', True, color)
 text_2 = smallfont.render('Instruction', True, color)
 text_3 = smallfont.render('Choose level', True, color)
 
+back_button = smallfont.render('--back->', True, color)
 # texts for change_level
 text_lev_1 = smallfont.render('level №1', True, color)
 text_lev_2 = smallfont.render('level №2', True, color)
@@ -58,10 +59,32 @@ def instruction():
     fon = pygame.transform.scale(load_image('instruction.jpg'), (width, height))
     screen.blit(fon, (0, 0))
 
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if width / 1.2 <= mouse[0] <= width / 1.2 + 140 and height / 24 <= mouse[1] <= height / 24 + 40:
+                    start_screen()
+
+        mouse = pygame.mouse.get_pos()
+
+        # if mouse is hovered on a button it
+        # changes to lighter shade
+        if width / 1.2 <= mouse[0] <= width / 1.2 + 140 and height / 24 <= mouse[1] <= height / 24 + 40:
+            pygame.draw.rect(screen, color_light, [width / 1.2, height / 24, 150, 40])
+
+        else:
+            pygame.draw.rect(screen, color_dark, [width / 1.2, height / 24, 150, 40])
+        screen.blit(back_button, (width / 1.2 + 5, height / 24))
+
+        pygame.display.update()
+
 
 def wrong_message():
     fon = pygame.transform.scale(load_image('wrong_message.png'), (width, height))
     screen.blit(fon, (0, 0))
+
     is_running = True
     while is_running:
         for event in pygame.event.get():
@@ -69,9 +92,11 @@ def wrong_message():
                 is_running = False
         pygame.display.update()
 
+
 def change_level():
     fon = pygame.transform.scale(load_image('picker_level.jpg'), (width, height))
     screen.blit(fon, (0, 0))
+
     is_running = True
     while is_running:
         for event in pygame.event.get():
@@ -95,13 +120,13 @@ def change_level():
         else:
             pygame.draw.rect(screen, color_dark, [width / 2.5, height / 2, 200, 60])
 
-        # second_button Instructions
+        # second_button Instruction
         if width / 2.5 <= mouse[0] <= width / 2.5 + 200 and height / 3.5 <= mouse[1] <= height / 3.5 + 60:
             pygame.draw.rect(screen, color_light, [width / 2.5, height / 3.5, 200, 60])
         else:
             pygame.draw.rect(screen, color_dark, [width / 2.5, height / 3.5, 200, 60])
 
-        # third-button Change Fon
+        # third-button Choose level
         if width / 2.5 <= mouse[0] <= width / 2.5 + 200 and height / 2.5 <= mouse[1] <= height / 2.5 + 60:
             pygame.draw.rect(screen, color_light, [width / 2.5, height / 2.5, 200, 60])
 
@@ -120,7 +145,7 @@ class Sprite(pygame.sprite.Sprite):
         self.rect = None
 
 
-class Player(Sprite):
+class Guess(Sprite):
     def __init__(self, pos_x, pos_y):
         super().__init__(hero_group)
         self.image = player_image
@@ -188,13 +213,13 @@ while is_running:
         keys = pygame.key.get_pressed()
         pressed_keys = pygame.key.get_pressed()
         if pressed_keys[pygame.K_DOWN]:
-            player.rect.top += step
+            guess.rect.top += step
         if pressed_keys[pygame.K_UP]:
-            player.rect.top -= step
+            guess.rect.top -= step
         if pressed_keys[pygame.K_RIGHT]:
-            player.rect.left += step
+            guess.rect.left += step
         if pressed_keys[pygame.K_LEFT]:
-            player.rect.left -= step
+            guess.rect.left -= step
 
     background_color = pygame.Color('white')
     screen.fill(background_color)
