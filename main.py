@@ -22,7 +22,7 @@ player = None
 
 step = 10
 FPS = 60
-width = 1000
+width = 800
 height = 800
 screen = pygame.display.set_mode((width, height))
 pygame.display.set_caption("Goose-adventurer")
@@ -44,16 +44,17 @@ height = screen.get_height()
 
 smallfont = pygame.font.SysFont('Corbel', 35)
 
-text_1 = smallfont.render('start', True, color)
-text_2 = smallfont.render('Instructions', True, color)
-text_3 = smallfont.render('Change Fon', True, color)
+text_1 = smallfont.render('Start', True, color)
+text_2 = smallfont.render('Instruction', True, color)
+text_3 = smallfont.render('Choose level', True, color)
 
 
-class Instructions:
-    pass
+def instruction():
+    fon = pygame.transform.scale(load_image('instruction.jpg'), (width, height))
+    screen.blit(fon, (0, 0))
 
 
-class Changing_Fon:
+class Choose_level:
     pass
 
 
@@ -86,11 +87,10 @@ def start_screen():
                 if width / 2.5 <= mouse[0] <= width / 2.5 + 140 and height / 1.1 <= mouse[1] <= height / 1.1 + 40:
                     return
                 elif width / 11 <= mouse[0] <= width / 11 + 140 and height / 1.1 <= mouse[1] <= height / 1.1 + 40:
-                    Instructions()
+                    instruction()
 
                 elif width / 1.5 <= mouse[0] <= width / 1.5 + 140 and height / 1.1 <= mouse[1] <= height / 1.1 + 40:
-                    Changing_Fon()
-
+                    Choose_level()
 
         # stores the (x,y) coordinates into
         # the variable as a tuple
@@ -102,13 +102,13 @@ def start_screen():
 
         else:
             pygame.draw.rect(screen, color_dark, [width / 2.5, height / 1.1, 140, 40])
-        # second_button Instructions
+        # second_button Instruction
         if width / 11 <= mouse[0] <= width / 11 + 140 and height / 1.1 <= mouse[1] <= height / 1.1 + 40:
             pygame.draw.rect(screen, color_light, [width / 11, height / 1.1, 180, 40])
 
         else:
             pygame.draw.rect(screen, color_dark, [width / 11, height / 1.1, 180, 40])
-        # third-button Change Fon
+        # third-button Choose level
         if width / 1.5 <= mouse[0] <= width / 1.5 + 140 and height / 1.1 <= mouse[1] <= height / 1.1 + 40:
             pygame.draw.rect(screen, color_light, [width / 1.5, height / 1.1, 180, 40])
 
@@ -141,7 +141,7 @@ while is_running:
         if pressed_keys[pygame.K_LEFT]:
             player.rect.left -= step
 
-    background_color = pygame.Color('black')
+    background_color = pygame.Color('white')
     screen.fill(background_color)
     all_sprites.draw(screen)
     pygame.display.flip()
