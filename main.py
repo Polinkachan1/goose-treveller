@@ -110,6 +110,7 @@ def change_level():
 
                 elif width / 2.5 <= mouse[0] <= width / 2.5 + 200 and height / 3.5 <= mouse[1] <= height / 3.5 + 60:
                     return
+
                 elif width / 2.5 <= mouse[0] <= width / 2.5 + 200 and height / 2.5 <= mouse[1] <= height / 2.5 + 60:
                     #  need to add third level
                     return wrong_message()
@@ -232,22 +233,34 @@ class Player(sprite.Sprite):
 
     def collide(self, x_speed, y_speed, platforms):
         for p in platforms:
-            if sprite.collide_rect(self, p):  # если есть пересечение платформы с игроком
+            if sprite.collide_rect(self, p): # если есть пересечение платформы с игроком
+                if isinstance(p, Danger) or isinstance(p, Monster): # если пересакаемый блок - Danger или Monster
+                       self.depth()
+                elif isinstance(p, End_portal):
+                       self.teleport(self.startX, self.startY)
 
-                if x_speed > 0:  # если движется вправо
-                    self.rect.right = p.rect.left  # то не движется вправо
+                else:
+                    if x_speed > 0:  # если движется вправо
+                        self.rect.right = p.rect.left  # то не движется вправо
 
-                if x_speed < 0:  # если движется влево
-                    self.rect.left = p.rect.right  # то не движется влево
+                    if x_speed < 0:  # если движется влево
+                        self.rect.left = p.rect.right  # то не движется влево
 
-                if y_speed > 0:  # если падает вниз
-                    self.rect.bottom = p.rect.top  # то не падает вниз
-                    self.onGround = True  # и становится на что-то твердое
-                    self.y_speed = 0  # и энергия падения пропадает
+                    if y_speed > 0:  # если падает вниз
+                        self.rect.bottom = p.rect.top  # то не падает вниз
+                        self.onGround = True  # и становится на что-то твердое
+                        self.y_speed = 0  # и энергия падения пропадает
 
-                if y_speed < 0:  # если движется вверх
-                    self.rect.top = p.rect.bottom  # то не движется вверх
-                    self.y_speed = 0
+                    if y_speed < 0:  # если движется вверх
+                        self.rect.top = p.rect.bottom  # то не движется вверх
+                        self.y_speed = 0
+    def depth(self):
+        time.wait(100)
+        self.teleport(self.startX, self.startY)
+
+    def teleport(self, moveX, moveY):
+        self.rect.x = moveX
+        self.rect.y = moveY
 
 
 class Platform(sprite.Sprite):
@@ -263,38 +276,68 @@ class Coin(sprite.Sprite):
         sprite.Sprite.__init__(self)
         self.image = Surface((PLATFORM_WIDTH, PLATFORM_HEIGHT))
         self.image = load_image(image)
-        self.rect = Rect(x, y, PLATFORM_WIDTH, PLATFORM_HEIGHT
+        self.rect = Rect(x, y, PLATFORM_WIDTH, PLATFORM_HEIGHT)
 
-                         )
-hero = Player(55, 55) # создаем героя по (x,y) координатам
+class Danger(sprite.Sprite):
+    def __init__(self, x, y, image):
+        Platform.__init__(self, x, y, image)
+        self.image = load_image(image)
+        self.image.set_colorkey(Color(COLOR))
+
+    def player_die(self):
+        time.delay(50)
+        self.teleport(self.startX, self.startY)
+
+    def teleport(self, moveX, moveY):
+        self.rect.x = moveX
+        self.rect.y = moveY
+
+class Monster(sprite.Sprite):
+    def __init__(self, x, y, image):
+        Platform.__init__(self, x, y, image)
+        self.image = load_image(image)
+        self.image.set_colorkey(Color(COLOR))
+
+    def player_die(self):
+        pass
+
+
+class End_portal(sprite.Sprite):
+    def __init__(self, x, y, image):
+        Platform.__init__(self, x, y, image)
+        self.image = load_image(image)
+        self.image.set_colorkey(Color(COLOR))
+
+    def next_level(self):
+        pass
+
+
 left = right = up = False    # по умолчанию — стоим
 
 all_sprites = pygame.sprite.Group() # Все объекты
 platforms = []  # то, во что мы будем врезаться или опираться
 coins = []  # то, что мы будем собирать
-all_sprites.add(hero)
 
-level_1 = [
-       "-                          ",
-       "-                          ",
-       "-                          ",
-       "-                          ",
-       "-            --            ",
-       "-                          ",
-       "-                          ",
-       "-                          ",
-       "-                   ---    ",
-       "-                          ",
-       "-                          ",
-       "-      ---                 ",
-       "-   $$$                    ",
-       "-   -----------            ",
-       "-                $         ",
-       "-                -         ",
-       "-G                  --     ",
-       "---------------------------",
-       "-------------  ----------  ",
-       "-------------  ----------  "]
+level_1 = ["-                                 ",
+           "-            --                   ",
+           "-                                 ",
+           "-                                 ",
+           "-                   ----     ---  ",
+           "-                                 ",
+           "-                                 ",
+           "-            *                    ",
+           "-                            ---  ",
+           "-                                 ",
+           "-                                 ",
+           "-     ---        !          *     ",
+           "-       $ $     ---               ",
+           "-           ----                  ",
+           "-   --------                      ",
+           "-  -                      -  !    ",
+           "-                          ------ ",
+           "-           ***                   ",
+           "-G        PP                      ",
+           "----------------------------------"]
 
 x = y = 0  # координаты
 for row in level_1:  # вся строка
@@ -307,6 +350,21 @@ for row in level_1:  # вся строка
             cn = Coin(x, y, 'coin0.png')
             all_sprites.add(cn)
             coins.append(cn)
+        if col == 'P':
+            pl = Platform(x, y, 'wood_block.png')
+            all_sprites.add(pl)
+            platforms.append(pl)
+        if col == '*':
+            dan = Danger(x, y, 'lovushka.png')
+            all_sprites.add(dan)
+            platforms.append(dan)
+        if col == '!':
+            next_l = End_portal(x, y, 'door.png')
+            all_sprites.add(next_l)
+            platforms.append(next_l)
+        if col == 'G':
+            hero = Player(x, y)
+            all_sprites.add(hero)
 
         x += PLATFORM_WIDTH  # блоки платформы ставятся на ширине блоков
     y += PLATFORM_HEIGHT  # то же самое и с высотой
@@ -332,7 +390,6 @@ while is_running:
             up = True
         if event.type == KEYUP and event.key == K_UP:
             up = False
-
 
     screen.blit(BACKGROUND, (0, 0))  # Каждую итерацию необходимо всё перерисовывать
     hero.update(left, right, up, platforms)
