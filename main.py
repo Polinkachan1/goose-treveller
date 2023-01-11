@@ -5,7 +5,6 @@ import os
 import pygame
 
 
-
 def load_image(name, colorkey=None):
     fullname = os.path.join('data', name)
     if not os.path.isfile(fullname):
@@ -18,17 +17,20 @@ def load_image(name, colorkey=None):
 PLATFORM_WIDTH = 32
 PLATFORM_HEIGHT = 32
 
-width = 800  #Ширина создаваемого окна
+width = 800  # Ширина создаваемого окна
 height = 640  # Высота
 display = (width, height)  # Группируем ширину и высоту в одну переменную
 pygame.init()  # Инициация PyGame, обязательная строчка
 screen = pygame.display.set_mode(display)
 pygame.display.set_caption("Goose-adventurer")
 
-BACKGROUND = load_image('simple_blue_fon.jpg')
-background_2 =load_image('forest_with_deers.jpg')
+background_1 = load_image('simple_blue_fon.jpg')
+background_2 = load_image('forest_with_deers.jpg')
 background_3 = load_image('desert_broun.jpg')
 
+goose_animation = [pygame.image.load("data/goose_go_left_1.png"), pygame.image.load("data/goose_go_left4.png"),
+                   pygame.image.load("data/goose_left_3.png"), pygame.image.load("data/goose_jump.png"),
+                   pygame.image.load("data/goose_jumps_left.png")]
 
 clock = pygame.time.Clock()
 # all for start_screen
@@ -45,6 +47,27 @@ back_button = smallfont.render('--back->', True, color)
 text_lev_1 = smallfont.render('level №1', True, color)
 text_lev_2 = smallfont.render('level №2', True, color)
 text_lev_3 = smallfont.render('level №3', True, color)
+
+
+def sprite_goose():
+    value = 0
+    run = True
+    while run:
+        clock.tick(3)
+
+        if value >= len(goose_animation):
+            value = 0
+        image = goose_animation[value]
+        x = 150
+        if value == 0:
+            y = 200
+        else:
+            y = 265
+
+        screen.blit(image, (x, y))
+        pygame.display.update()
+        screen.blit(background_1, (0, 0))
+        value += 1
 
 
 def instruction():
@@ -139,6 +162,7 @@ def change_level():
         screen.blit(text_lev_2, (width / 2.5 + 20, height / 2.5 + 10))  # second button
         pygame.display.update()
 
+
 def start_screen():
     fon = pygame.transform.scale(load_image('start_screen.jpg'), (width, height))
     screen.blit(fon, (0, 0))
@@ -185,11 +209,26 @@ def start_screen():
         pygame.display.update()
 
 
+class Camera:
+    # зададим начальный сдвиг камеры
+    def __init__(self):
+        self.dx = 0
+        self.dy = 0
+
+    # сдвинуть объект obj на смещение камеры
+    def apply(self, obj):
+        obj.rect.x += self.dx
+        obj.rect.y += self.dy
+
+    # позиционировать камеру на объекте target
+    def update(self, target):
+        self.dx = -(target.rect.x + target.rect.w // 2 - width // 2)
+        self.dy = -(target.rect.y + target.rect.h // 2 - height // 2)
 
 
 MOVE_SPEED = 5
 JUMP_POWER = 10
-GRAVITY = 0.35 # Сила, которая будет тянуть нас вниз
+GRAVITY = 0.35  # Сила, которая будет тянуть нас вниз
 WIDTH = 20
 HEIGHT = 30
 COLOR = "#888888"
@@ -204,10 +243,10 @@ class Player(sprite.Sprite):
         self.onGround = False  # На земле ли я?
         self.startY = y
         self.image = Surface((WIDTH, HEIGHT))
+        # self.image = sprite_goose()
         self.image = load_image('gose.png')
         self.rect = Rect(x, y, WIDTH, HEIGHT)
         self.image.set_colorkey(Color(COLOR))
-
 
     def update(self, left, right, up, platforms):
         if left:
@@ -226,18 +265,18 @@ class Player(sprite.Sprite):
             self.y_speed += GRAVITY
 
         self.onGround = False
-        self.rect.y += self.y_speed # переносим своё положение на y_speed
+        self.rect.y += self.y_speed  # переносим своё положение на y_speed
         self.collide(0, self.y_speed, platforms)
         self.rect.x += self.x_speed  # переносим свои положение на x_speed
         self.collide(self.x_speed, 0, platforms)
 
     def collide(self, x_speed, y_speed, platforms):
         for p in platforms:
-            if sprite.collide_rect(self, p): # если есть пересечение платформы с игроком
-                if isinstance(p, Danger) or isinstance(p, Monster): # если пересакаемый блок - Danger или Monster
-                       self.depth()
+            if sprite.collide_rect(self, p):  # если есть пересечение платформы с игроком
+                if isinstance(p, Danger) or isinstance(p, Monster):  # если пересакаемый блок - Danger или Monster
+                    self.depth()
                 elif isinstance(p, End_portal):
-                       self.teleport(self.startX, self.startY)
+                    self.teleport(self.startX, self.startY)
 
                 else:
                     if x_speed > 0:  # если движется вправо
@@ -254,6 +293,7 @@ class Player(sprite.Sprite):
                     if y_speed < 0:  # если движется вверх
                         self.rect.top = p.rect.bottom  # то не движется вверх
                         self.y_speed = 0
+
     def depth(self):
         time.wait(100)
         self.teleport(self.startX, self.startY)
@@ -278,6 +318,7 @@ class Coin(sprite.Sprite):
         self.image = load_image(image)
         self.rect = Rect(x, y, PLATFORM_WIDTH, PLATFORM_HEIGHT)
 
+
 class Danger(sprite.Sprite):
     def __init__(self, x, y, image):
         Platform.__init__(self, x, y, image)
@@ -291,6 +332,7 @@ class Danger(sprite.Sprite):
     def teleport(self, moveX, moveY):
         self.rect.x = moveX
         self.rect.y = moveY
+
 
 class Monster(sprite.Sprite):
     def __init__(self, x, y, image):
@@ -312,9 +354,9 @@ class End_portal(sprite.Sprite):
         pass
 
 
-left = right = up = False    # по умолчанию — стоим
+left = right = up = False  # по умолчанию — стоим
 
-all_sprites = pygame.sprite.Group() # Все объекты
+all_sprites = pygame.sprite.Group()  # Все объекты
 platforms = []  # то, во что мы будем врезаться или опираться
 coins = []  # то, что мы будем собирать
 
@@ -391,15 +433,13 @@ while is_running:
         if event.type == KEYUP and event.key == K_UP:
             up = False
 
-    screen.blit(BACKGROUND, (0, 0))  # Каждую итерацию необходимо всё перерисовывать
+    screen.blit(background_1, (0, 0))  # Каждую итерацию необходимо всё перерисовывать
     hero.update(left, right, up, platforms)
     all_sprites.draw(screen)
+    # Camera.update(Player)
+    # обновляем положение всех спрайтов
+    # for sprite in all_sprites:
+    # Camera.apply(sprite)
     pygame.display.update()  # обновление и вывод всех изменений на экран
     clock.tick(FPS)
 pygame.quit()
-
-
-
-
-
-
