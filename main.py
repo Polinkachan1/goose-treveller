@@ -13,9 +13,11 @@ def load_image(name, colorkey=None):
     image = pygame.image.load(fullname)
     return image
 
+
 def draw_text(text, font, text_col, x, y):
-	img = font.render(text, True, text_col)
-	screen.blit(img, (x, y))
+    img = font.render(text, True, text_col)
+    screen.blit(img, (x, y))
+
 
 PLATFORM_WIDTH = 32
 PLATFORM_HEIGHT = 32
@@ -25,7 +27,7 @@ height = 640  # Высота
 display = (width, height)  # Группируем ширину и высоту в одну переменную
 pygame.init()  # Инициация PyGame, обязательная строчка
 screen = pygame.display.set_mode(display)
-pygame.display.set_caption("Goose-adventurer")
+pygame.display.set_caption('Goose-adventurer')
 
 background_1 = load_image('simple_blue_fon.jpg')
 background_2 = load_image('forest_with_deers.jpg')
@@ -35,7 +37,8 @@ goose_animation = [pygame.image.load("data/goose_go_left_1.png"), pygame.image.l
                    pygame.image.load("data/goose_left_3.png"), pygame.image.load("data/goose_jump.png"),
                    pygame.image.load("data/goose_jumps_left.png")]
 coin_animation = [pygame.image.load('data/coin1.png'), pygame.image.load('data/coin2.png'),
-                  pygame.image.load('data/coin3.png'), pygame.image.load('data/coin4.png'), pygame.image.load('data/coin5.png')]
+                  pygame.image.load('data/coin3.png'), pygame.image.load('data/coin4.png'),
+                  pygame.image.load('data/coin5.png')]
 clock = pygame.time.Clock()
 # all for start_screen
 color = (255, 255, 255)
@@ -51,27 +54,6 @@ back_button = smallfont.render('--back->', True, color)
 text_lev_1 = smallfont.render('level №1', True, color)
 text_lev_2 = smallfont.render('level №2', True, color)
 text_lev_3 = smallfont.render('level №3', True, color)
-
-
-def sprite_goose():
-    value = 0
-    run = True
-    while run:
-        clock.tick(3)
-
-        if value >= len(goose_animation):
-            value = 0
-        image = goose_animation[value]
-        x = 150
-        if value == 0:
-            y = 200
-        else:
-            y = 265
-
-        screen.blit(image, (x, y))
-        pygame.display.update()
-        screen.blit(background_1, (0, 0))
-        value += 1
 
 
 def instruction():
@@ -227,7 +209,7 @@ class Camera:
     # позиционировать камеру на объекте target
     def update(self, target):
         self.dx = -(target.rect.x + target.rect.w // 2 - width // 2)
-        self.dy = -(target.rect.y + target.rect.h // 2 - height // 2)
+
 
 
 MOVE_SPEED = 5
@@ -238,6 +220,31 @@ HEIGHT = 30
 COLOR = "#888888"
 COINCOUNT = 0
 levelcounter = 0
+
+
+def sprite_goose():
+    value = 0
+    is_running = True
+    while is_running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                is_running = False
+        clock.tick(3)
+
+        if value >= len(goose_animation):
+            value = 0
+        image = goose_animation[value]
+        x = 150
+        if value == 0:
+            y = 200
+        else:
+            y = 265
+
+        screen.blit(image, (x, y))
+        pygame.display.update()
+        screen.blit(background_1, (0, 0))
+        value += 1
+
 
 class Player(sprite.Sprite):
     def __init__(self, x, y):
@@ -256,10 +263,8 @@ class Player(sprite.Sprite):
     def update(self, left, right, up, platforms):
         if left:
             self.x_speed -= MOVE_SPEED // 3  # Лево = x - n
-
         if right:
             self.x_speed = MOVE_SPEED  # Право = x + n
-
         if up:
             if self.onGround:
                 self.y_speed -= JUMP_POWER
@@ -277,11 +282,11 @@ class Player(sprite.Sprite):
 
     def collide(self, x_speed, y_speed, platforms):
         for p in platforms:
-            if sprite.collide_rect(self, p):  # если есть пересечение платформы с игроком
+            if pygame.sprite.collide_rect(self, p):  # если есть пересечение платформы с игроком
                 if isinstance(p, Danger) or isinstance(p, Monster):  # если пересакаемый блок - Danger или Monster
                     self.depth()
-                #elif isinstance(p, Coin):
-                    #self.get_profit()
+                # elif isinstance(p, Coin):
+                # self.get_profit()
                 elif isinstance(p, End_portal):
                     self.teleport(self.startX, self.startY)
 
@@ -309,14 +314,13 @@ class Player(sprite.Sprite):
         self.rect.x = moveX
         self.rect.y = moveY
 
+
 class Platform(sprite.Sprite):
     def __init__(self, x, y, image):
         sprite.Sprite.__init__(self)
         self.image = Surface((PLATFORM_WIDTH, PLATFORM_HEIGHT))
         self.image = load_image(image)
         self.rect = Rect(x, y, PLATFORM_WIDTH, PLATFORM_HEIGHT)
-
-
 
 
 class Coin(sprite.Sprite):
@@ -331,8 +335,6 @@ class Coin(sprite.Sprite):
 
     def update(self):
         pass
-
-
 
 
 class Danger(sprite.Sprite):
@@ -371,11 +373,10 @@ class End_portal(sprite.Sprite):
         levelcounter += 1
 
 
-
 left = right = up = False  # по умолчанию — стоим
 
 all_sprites = pygame.sprite.Group()  # Все объекты, кроме монет
-coin_group = pygame.sprite.Group() #  монеты
+coin_group = pygame.sprite.Group()  # монеты
 platforms = []  # то, во что мы будем врезаться или опираться
 
 level_1 = ["-                                 ",
@@ -408,6 +409,7 @@ for row in level_1:  # вся строка
             platforms.append(pf)
         if col == '$':
             cn = Coin(x, y, 'coin0.png')
+            all_sprites.add(cn)
             coin_group.add(cn)
         if col == 'P':
             pl = Platform(x, y, 'wood_block.png')
@@ -422,8 +424,8 @@ for row in level_1:  # вся строка
             all_sprites.add(next_l)
             platforms.append(next_l)
         if col == 'G':
-            hero = Player(x, y)
-            all_sprites.add(hero)
+            player = Player(x, y)
+            all_sprites.add(player)
 
         x += PLATFORM_WIDTH  # блоки платформы ставятся на ширине блоков
     y += PLATFORM_HEIGHT  # то же самое и с высотой
@@ -451,19 +453,18 @@ while is_running:
         if event.type == KEYUP and event.key == K_UP:
             up = False
 
-    screen.blit(background_1, (0, 0))# Каждую итерацию необходимо всё перерисовывать
+    screen.blit(background_1, (0, 0))  # Каждую итерацию необходимо всё перерисовывать
 
-    #camera.update(hero)
+    camera.update(player)
+    for sprite in all_sprites:
+        camera.apply(sprite)
     # проверка того, была ли собрана монетка
-    if pygame.sprite.spritecollide(hero, coin_group, True):
+    if pygame.sprite.spritecollide(player, coin_group, True):
         COINCOUNT += 1
     draw_text('score: ' + str(COINCOUNT), smallfont, 'white', PLATFORM_WIDTH, 20)
     all_sprites.draw(screen)
     coin_group.draw(screen)
-    hero.update(left, right, up, platforms)
-    # обновляем положение всех спрайтов
-    #for sprite in all_sprites:
-        #camera.apply(sprite)
+    player.update(left, right, up, platforms)
     pygame.display.update()  # обновление и вывод всех изменений на экран
     clock.tick(FPS)
 pygame.quit()
