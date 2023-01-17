@@ -14,11 +14,6 @@ def load_image(name, colorkey=None):
     return image
 
 
-def draw_text(text, font, text_col, x, y):
-    img = font.render(text, True, text_col)
-    screen.blit(img, (x, y))
-
-
 PLATFORM_WIDTH = 32
 PLATFORM_HEIGHT = 32
 
@@ -37,8 +32,7 @@ goose_animation = [pygame.image.load("data/goose_go_left_1.png"), pygame.image.l
                    pygame.image.load("data/goose_left_3.png"), pygame.image.load("data/goose_jump.png"),
                    pygame.image.load("data/goose_jumps_left.png")]
 coin_animation = [pygame.image.load('data/coin1.png'), pygame.image.load('data/coin2.png'),
-                  pygame.image.load('data/coin3.png'), pygame.image.load('data/coin4.png'),
-                  pygame.image.load('data/coin5.png')]
+                  pygame.image.load('data/coin3.png'), pygame.image.load('data/coin4.png'), pygame.image.load('data/coin5.png')]
 clock = pygame.time.Clock()
 # all for start_screen
 color = (255, 255, 255)
@@ -54,6 +48,11 @@ back_button = smallfont.render('--back->', True, color)
 text_lev_1 = smallfont.render('level №1', True, color)
 text_lev_2 = smallfont.render('level №2', True, color)
 text_lev_3 = smallfont.render('level №3', True, color)
+
+
+def draw_text(text, font, text_col, x, y):
+    img = font.render(text, True, text_col)
+    screen.blit(img, (x, y))
 
 
 def instruction():
@@ -84,21 +83,21 @@ def wrong_message():
     fon = pygame.transform.scale(load_image('wrong_message.png'), (width, height))
     screen.blit(fon, (0, 0))
 
-    is_running = True
-    while is_running:
+    while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                is_running = False
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if width / 0.9 <= mouse[0] <= width / 0.9 + 200 and height / 10 <= mouse[1] <= height / 10 + 60:
-                    return change_level()
+                pygame.quit()
+            if width / 1.2 <= mouse[0] <= width / 1.2 + 140 and height / 24 <= mouse[1] <= height / 24 + 40:
+                return start_screen()
 
         mouse = pygame.mouse.get_pos()
-        if width / 0.9 <= mouse[0] <= width / 0.9 + 200 and height / 10 <= mouse[1] <= height / 10 + 60:
-            pygame.draw.rect(screen, color_light, [width / 0.9, height / 10, 200, 60])
+
+        if width / 1.2 <= mouse[0] <= width / 1.2 + 140 and height / 24 <= mouse[1] <= height / 24 + 40:
+            pygame.draw.rect(screen, color_light, [width / 1.2, height / 24, 150, 40])
+
         else:
-            pygame.draw.rect(screen, color_dark, [width / 0.9, height / 10, 200, 60])
-        screen.blit(back_button, (width / 0.9 + 20, height / 10 + 10))  # third button
+            pygame.draw.rect(screen, color_dark, [width / 1.2, height / 24, 150, 40])
+        screen.blit(back_button, (width / 1.2 + 5, height / 24))
         pygame.display.update()
 
 
@@ -195,6 +194,11 @@ def start_screen():
         pygame.display.update()
 
 
+def game_over():
+    fon = pygame.transform.scale(load_image('game_over.jpg'), (width, height))
+    screen.blit(fon, (0, 0))
+
+
 class Camera:
     # зададим начальный сдвиг камеры
     def __init__(self):
@@ -211,7 +215,6 @@ class Camera:
         self.dx = -(target.rect.x + target.rect.w // 2 - width // 2)
 
 
-
 MOVE_SPEED = 5
 JUMP_POWER = 10
 GRAVITY = 0.35  # Сила, которая будет тянуть нас вниз
@@ -220,7 +223,8 @@ HEIGHT = 30
 COLOR = "#888888"
 COINCOUNT = 0
 levelcounter = 0
-
+depth_counter = 0
+lifes_left = 3
 
 def sprite_goose():
     value = 0
@@ -250,7 +254,7 @@ class Player(sprite.Sprite):
     def __init__(self, x, y):
         sprite.Sprite.__init__(self)
         self.x_speed = 0  # скорость перемещения. 0 - стоять на месте
-        self.startX = x  # Начальная позиция Х, пригодится когда будем переигрывать уровень
+        self.startX = x  # Начальная позиция Х
         self.y_speed = 0  # скорость вертикального перемещения
         self.onGround = False  # На земле ли я?
         self.startY = y
@@ -262,9 +266,11 @@ class Player(sprite.Sprite):
 
     def update(self, left, right, up, platforms):
         if left:
-            self.x_speed -= MOVE_SPEED // 3  # Лево = x - n
+            self.x_speed = -MOVE_SPEED  # Лево = x - n
+
         if right:
             self.x_speed = MOVE_SPEED  # Право = x + n
+
         if up:
             if self.onGround:
                 self.y_speed -= JUMP_POWER
@@ -307,8 +313,11 @@ class Player(sprite.Sprite):
                         self.y_speed = 0
 
     def depth(self):
-        time.wait(100)
+        global lifes_left
+        time.wait(500)
         self.teleport(self.startX, self.startY)
+        lifes_left -= 1
+
 
     def teleport(self, moveX, moveY):
         self.rect.x = moveX
@@ -321,6 +330,7 @@ class Platform(sprite.Sprite):
         self.image = Surface((PLATFORM_WIDTH, PLATFORM_HEIGHT))
         self.image = load_image(image)
         self.rect = Rect(x, y, PLATFORM_WIDTH, PLATFORM_HEIGHT)
+
 
 
 class Coin(sprite.Sprite):
@@ -352,6 +362,8 @@ class Danger(sprite.Sprite):
         self.rect.y = moveY
 
 
+
+
 class Monster(sprite.Sprite):
     def __init__(self, x, y, image):
         Platform.__init__(self, x, y, image)
@@ -371,6 +383,7 @@ class End_portal(sprite.Sprite):
     def next_level(self):
         global levelcounter
         levelcounter += 1
+
 
 
 left = right = up = False  # по умолчанию — стоим
@@ -397,8 +410,8 @@ level_1 = ["-                                 ",
            "-  -                      -  !    ",
            "-                          ------ ",
            "-           ***                   ",
-           "-G        PP                      ",
-           "----------------------------------"]
+           "-G        P                      ",
+           "----------PP----------------------"]
 
 x = y = 0  # координаты
 for row in level_1:  # вся строка
@@ -461,10 +474,15 @@ while is_running:
     # проверка того, была ли собрана монетка
     if pygame.sprite.spritecollide(player, coin_group, True):
         COINCOUNT += 1
+
     draw_text('score: ' + str(COINCOUNT), smallfont, 'white', PLATFORM_WIDTH, 20)
+    draw_text('lifes_left: ' + str(lifes_left), smallfont, 'white', PLATFORM_WIDTH, 40)
+
     all_sprites.draw(screen)
     coin_group.draw(screen)
     player.update(left, right, up, platforms)
+    if lifes_left == 0:
+        game_over()
     pygame.display.update()  # обновление и вывод всех изменений на экран
     clock.tick(FPS)
 pygame.quit()
