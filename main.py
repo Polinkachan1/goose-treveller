@@ -48,7 +48,7 @@ back_button = smallfont.render('--back->', True, color)
 text_lev_1 = smallfont.render('level №1', True, color)
 text_lev_2 = smallfont.render('level №2', True, color)
 text_lev_3 = smallfont.render('level №3', True, color)
-
+restart_text = smallfont.render('try again', True, color)
 
 def draw_text(text, font, text_col, x, y):
     img = font.render(text, True, text_col)
@@ -197,6 +197,25 @@ def start_screen():
 def game_over():
     fon = pygame.transform.scale(load_image('game_over.jpg'), (width, height))
     screen.blit(fon, (0, 0))
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+            # checks if a mouse is clicked
+            if event.type == pygame.MOUSEBUTTONDOWN:
+
+                if width / 2.5 <= mouse[0] <= width / 2.5 + 140 and height / 1.1 <= mouse[1] <= height / 1.1 + 40:
+                    return start_screen()
+        mouse = pygame.mouse.get_pos()
+        if width / 2.5 <= mouse[0] <= width / 2.5 + 140 and height / 1.1 <= mouse[1] <= height / 1.1 + 40:
+            pygame.draw.rect(screen, color_light, [width / 2.5, height / 1.1, 140, 40])
+
+        else:
+            pygame.draw.rect(screen, color_dark, [width / 2.5, height / 1.1, 140, 40])
+        screen.blit(restart_text, (width / 2.5 + 10, height / 1.1))
+        draw_text('score: ' + str(COINCOUNT), smallfont, 'white', width / 2.5, height / 1.5)
+        pygame.display.update()
+
 
 
 class Camera:
@@ -225,6 +244,8 @@ COINCOUNT = 0
 levelcounter = 0
 depth_counter = 0
 lifes_left = 3
+EXTRA_SPEED = 2.5
+EXTRA_JUMP_POWER = 5
 
 def sprite_goose():
     value = 0
@@ -264,16 +285,22 @@ class Player(sprite.Sprite):
         self.rect = Rect(x, y, WIDTH, HEIGHT)
         self.image.set_colorkey(Color(COLOR))
 
-    def update(self, left, right, up, platforms):
+    def update(self, left, right, up, platforms, is_extra_run):
         if left:
             self.x_speed = -MOVE_SPEED  # Лево = x - n
+            if is_extra_run:  #ускорение
+                self.x_speed -= EXTRA_SPEED # ходьба-ускорение работает
 
         if right:
             self.x_speed = MOVE_SPEED  # Право = x + n
+            if is_extra_run:  #ускорение
+                self.x_speed += EXTRA_SPEED # ходьба-ускорение работает
 
         if up:
             if self.onGround:
                 self.y_speed -= JUMP_POWER
+                if is_extra_run and (left or right):  # есть ускорение и движение
+                    self.y_speed -= EXTRA_JUMP_POWER # то прыжок с ускорением
 
         if not (left or right):  # стоим, когда нет указаний идти
             self.x_speed = 0
@@ -386,7 +413,7 @@ class End_portal(sprite.Sprite):
 
 
 
-left = right = up = False  # по умолчанию — стоим
+left = right = up = is_extra_run = False  # по умолчанию — стоим
 
 all_sprites = pygame.sprite.Group()  # Все объекты, кроме монет
 coin_group = pygame.sprite.Group()  # монеты
@@ -465,6 +492,11 @@ while is_running:
             up = True
         if event.type == KEYUP and event.key == K_UP:
             up = False
+        if event.type == KEYUP and event.key == K_SPACE:
+            is_extra_run = False
+        if event.type == KEYDOWN and event.key == K_SPACE:
+            is_extra_run = True
+
 
     screen.blit(background_1, (0, 0))  # Каждую итерацию необходимо всё перерисовывать
 
@@ -480,7 +512,7 @@ while is_running:
 
     all_sprites.draw(screen)
     coin_group.draw(screen)
-    player.update(left, right, up, platforms)
+    player.update(left, right, up, platforms, is_extra_run)
     if lifes_left == 0:
         game_over()
     pygame.display.update()  # обновление и вывод всех изменений на экран
