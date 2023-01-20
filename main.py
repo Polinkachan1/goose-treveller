@@ -52,11 +52,18 @@ text_lev_3 = smallfont.render('level №3', True, color)
 restart_text = smallfont.render('try again', True, color)
 win_restart_text = smallfont.render('next level', True, color)
 all_win_text = smallfont.render('to main menu', True, color)
-
+levelcounter = 0
 
 def draw_text(text, font, text_col, x, y):
     img = font.render(text, True, text_col)
     screen.blit(img, (x, y))
+
+
+def reset_level(level):
+    player.reset(50, 50)
+    monster_group.empty()
+    coin_group.empty()
+    door_group.empty()
 
 
 def instruction():
@@ -106,6 +113,7 @@ def wrong_message():
 
 
 def change_level():
+    global levelcounter
     fon = pygame.transform.scale(load_image('picker_level.jpg'), (width, height))
     screen.blit(fon, (0, 0))
 
@@ -118,21 +126,14 @@ def change_level():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if width / 2.5 <= mouse[0] <= width / 2.5 + 200 and height / 2 <= mouse[1] <= height / 2 + 60:
                     # need to add first level
-                    return wrong_message()
-
-                elif width / 2.5 <= mouse[0] <= width / 2.5 + 200 and height / 3.5 <= mouse[1] <= height / 3.5 + 60:
+                    levelcounter = 1
                     return
 
-                elif width / 2.5 <= mouse[0] <= width / 2.5 + 200 and height / 2.5 <= mouse[1] <= height / 2.5 + 60:
-                    #  need to add third level
-                    return wrong_message()
+                elif width / 2.5 <= mouse[0] <= width / 2.5 + 200 and height / 3.5 <= mouse[1] <= height / 3.5 + 60:
+                    levelcounter = 0
+                    return
 
         mouse = pygame.mouse.get_pos()
-        if width / 2.5 <= mouse[0] <= width / 2.5 + 200 and height / 2 <= mouse[1] <= height / 2 + 60:
-            pygame.draw.rect(screen, color_light, [width / 2.5, height / 2, 200, 60])
-        else:
-            pygame.draw.rect(screen, color_dark, [width / 2.5, height / 2, 200, 60])
-
         # second_button Instruction
         if width / 2.5 <= mouse[0] <= width / 2.5 + 200 and height / 3.5 <= mouse[1] <= height / 3.5 + 60:
             pygame.draw.rect(screen, color_light, [width / 2.5, height / 3.5, 200, 60])
@@ -146,13 +147,13 @@ def change_level():
         else:
             pygame.draw.rect(screen, color_dark, [width / 2.5, height / 2.5, 200, 60])
         # superimposing the text onto our button
-        screen.blit(text_lev_3, (width / 2.5 + 20, height / 2 + 10))  # third button
         screen.blit(text_lev_1, (width / 2.5 + 20, height / 3.5 + 10))  # first button
         screen.blit(text_lev_2, (width / 2.5 + 20, height / 2.5 + 10))  # second button
         pygame.display.update()
 
 
 def start_screen():
+    global levelcounter
     fon = pygame.transform.scale(load_image('start_screen.jpg'), (width, height))
     screen.blit(fon, (0, 0))
 
@@ -162,7 +163,6 @@ def start_screen():
                 pygame.quit()
             # checks if a mouse is clicked
             if event.type == pygame.MOUSEBUTTONDOWN:
-
                 if width / 2.5 <= mouse[0] <= width / 2.5 + 140 and height / 1.1 <= mouse[1] <= height / 1.1 + 40:
                     return
                 elif width / 11 <= mouse[0] <= width / 11 + 140 and height / 1.1 <= mouse[1] <= height / 1.1 + 40:
@@ -197,6 +197,8 @@ def start_screen():
         # updates the frames of the game
         pygame.display.update()
 
+def level_changer():
+    pass
 
 def game_over():
     fon = pygame.transform.scale(load_image('game_over.jpg'), (width, height))
@@ -207,9 +209,8 @@ def game_over():
                 pygame.quit()
             # checks if a mouse is clicked
             if event.type == pygame.MOUSEBUTTONDOWN:
-
                 if width / 2.5 <= mouse[0] <= width / 2.5 + 140 and height / 1.1 <= mouse[1] <= height / 1.1 + 40:
-                    return start_screen()
+                    start_screen()
         mouse = pygame.mouse.get_pos()
         if width / 2.5 <= mouse[0] <= width / 2.5 + 140 and height / 1.1 <= mouse[1] <= height / 1.1 + 40:
             pygame.draw.rect(screen, color_light, [width / 2.5, height / 1.1, 140, 40])
@@ -231,17 +232,17 @@ def win_level():
             # checks if a mouse is clicked
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if width / 2.5 <= mouse[0] <= width / 2.5 + 140 and height / 1.1 <= mouse[1] <= height / 1.1 + 40:
-                    return start_screen()
+                    return
         mouse = pygame.mouse.get_pos()
         if width / 2.5 <= mouse[0] <= width / 2.5 + 140 and height / 1.1 <= mouse[1] <= height / 1.1 + 40:
             pygame.draw.rect(screen, color_light, [width / 2.5, height / 1.1, 140, 40])
 
         else:
             pygame.draw.rect(screen, color_dark, [width / 2.5, height / 1.1, 140, 40])
-        if levelcounter != 2:
-            screen.blit(win_restart_text, (width / 2.5 + 10, height / 1.1))
+        if levelcounter == 1:
+             screen.blit(all_win_text, (width / 2.5 + 10, height / 1.1))
         else:
-            screen.blit(all_win_text, (width / 2.5 + 10, height / 1.1))
+            screen.blit(restart_text, (width / 2.5 + 10, height / 1.1))
         draw_text('score: ' + str(COINCOUNT), smallfont, 'white', width / 2.5, height / 1.5)
         pygame.display.update()
 
@@ -269,50 +270,16 @@ WIDTH = 20
 HEIGHT = 30
 COLOR = "#888888"
 COINCOUNT = 0
-levelcounter = 0
 depth_counter = 0
 lifes_left = 3
 EXTRA_SPEED = 2.5
 EXTRA_JUMP_POWER = 5
 
 
-def sprite_goose():
-    value = 0
-    is_running = True
-    while is_running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                is_running = False
-        clock.tick(3)
-
-        if value >= len(goose_animation):
-            value = 0
-        image = goose_animation[value]
-        x = 150
-        if value == 0:
-            y = 200
-        else:
-            y = 265
-
-        screen.blit(image, (x, y))
-        pygame.display.update()
-        screen.blit(background_1, (0, 0))
-        value += 1
-
-
 class Player(sprite.Sprite):
     def __init__(self, x, y):
         sprite.Sprite.__init__(self)
-        self.x_speed = 0  # скорость перемещения. 0 - стоять на месте
-        self.startX = x  # Начальная позиция Х
-        self.y_speed = 0  # скорость вертикального перемещения
-        self.onGround = False  # На земле ли я?
-        self.startY = y
-        self.image = Surface((WIDTH, HEIGHT))
-        # self.image = sprite_goose()
-        self.image = load_image('gose.png')
-        self.rect = Rect(x, y, WIDTH, HEIGHT)
-        self.image.set_colorkey(Color(COLOR))
+        self.reset(x, y)
 
     def update(self, left, right, up, platforms, is_extra_run):
         if left:
@@ -378,6 +345,18 @@ class Player(sprite.Sprite):
         self.rect.x = moveX
         self.rect.y = moveY
 
+    def reset(self, x, y):
+        self.x_speed = 0  # скорость перемещения. 0 - стоять на месте
+        self.startX = x  # Начальная позиция Х
+        self.y_speed = 0  # скорость вертикального перемещения
+        self.onGround = False  # На земле ли я?
+        self.startY = y
+        self.image = Surface((WIDTH, HEIGHT))
+        # self.image = sprite_goose()
+        self.image = load_image('gose.png')
+        self.rect = Rect(x, y, WIDTH, HEIGHT)
+        self.image.set_colorkey(Color(COLOR))
+
 
 class Platform(sprite.Sprite):
     def __init__(self, x, y, image):
@@ -396,9 +375,6 @@ class Coin(sprite.Sprite):
         self.image.set_colorkey(Color(COLOR))
         self.x = x
         self.y = y
-
-    def update(self):
-        pass
 
 
 class Danger(sprite.Sprite):
@@ -441,23 +417,16 @@ class End_portal(sprite.Sprite):
         self.image = load_image(image)
         self.image.set_colorkey(Color(COLOR))
 
-    def next_level(self):
-        global levelcounter
-        levelcounter += 1
-
 
 left = right = up = is_extra_run = False  # по умолчанию — стоим
 
 all_sprites = pygame.sprite.Group()  # Все объекты, кроме монет
 coin_group = pygame.sprite.Group()  # монеты
-door_group = pygame.sprite.Group()  # портал
-monster_group = pygame.sprite.Group()  # монстр
+door_group = pygame.sprite.Group() # портал
+monster_group = pygame.sprite.Group() # монстр
 platforms = []  # то, во что мы будем врезаться или опираться
 
-pygame.mixer.music.load('game_music.mp3')
-pygame.mixer.music.play()
-
-level_m = ["-                                 ",
+level_1 = ["-                                 ",
            "-            --                   ",
            "-                                 ",
            "-                                 ",
@@ -468,56 +437,60 @@ level_m = ["-                                 ",
            "-                            ---  ",
            "-                                 ",
            "-                                 ",
-           "-     ---        M          *     ",
-           "-       $ $     ----              ",
-           "-           ----                  ",
-           "-   --------                      ",
-           "-  -                      -  !    ",
-           "-                          ------ ",
-           "-           ***                   ",
-           "-G        P                      ",
+           "-     ---        M          *    -",
+           "-       $ $     ----             -",
+           "-           ----                 -",
+           "-   --------                     -",
+           "-  -                      -  !   -",
+           "-                          -------",
+           "-           ***                  -",
+           "-G        P                     --",
            "----------PP----------------------"]
-
 x = y = 0  # координаты
-for row in level_m:  # вся строка
+for row in level:  # вся строка
     for col in row:  # каждый символ
-        if col == "-":
-            pf = Platform(x, y, 'block.png')
-            all_sprites.add(pf)
-            platforms.append(pf)
-        if col == '$':
-            cn = Coin(x, y, 'coin0.png')
-            all_sprites.add(cn)
-            coin_group.add(cn)
-        if col == 'P':
-            pl = Platform(x, y, 'wood_block.png')
-            all_sprites.add(pl)
-            platforms.append(pl)
-        if col == '*':
-            dan = Danger(x, y, 'lovushka.png')
-            all_sprites.add(dan)
-            platforms.append(dan)
-        if col == '!':
-            next_l = End_portal(x, y, 'door.png')
-            all_sprites.add(next_l)
-            door_group.add(next_l)
-        if col == 'M':
-            mon = Monster(x, y, 'monster.png')
-            all_sprites.add(mon)
-            monster_group.add(mon)
-        if col == 'G':
-            player = Player(x, y)
-            all_sprites.add(player)
+            if col == "-":
+                pf = Platform(x, y, 'block.png')
+                all_sprites.add(pf)
+                platforms.append(pf)
+            if col == '$':
+                cn = Coin(x, y, 'coin0.png')
+                all_sprites.add(cn)
+                coin_group.add(cn)
+            if col == 'P':
+                pl = Platform(x, y, 'wood_block.png')
+                all_sprites.add(pl)
+                platforms.append(pl)
+            if col == '*':
+                dan = Danger(x, y, 'lovushka.png')
+                all_sprites.add(dan)
+                platforms.append(dan)
+            if col == '!':
+                next_l = End_portal(x, y, 'door.png')
+                all_sprites.add(next_l)
+                door_group.add(next_l)
+            if col == 'M':
+                mon = Monster(x, y, 'monster.png')
+                all_sprites.add(mon)
+                monster_group.add(mon)
+            if col == 'G':
+                player = Player(x, y)
+                all_sprites.add(player)
 
-        x += PLATFORM_WIDTH  # блоки платформы ставятся на ширине блоков
-    y += PLATFORM_HEIGHT  # то же самое и с высотой
-    x = 0  # на каждой новой строчке начинаем с нуля
+            x += PLATFORM_WIDTH  # блоки платформы ставятся на ширине блоков
+        y += PLATFORM_HEIGHT  # то же самое и с высотой
+        x = 0  # на каждой новой строчке начинаем с нуля
 
 start_screen()
 camera = Camera()
 FPS = 60
+bg = background_1
 is_running = True
 while is_running:
+    if levelcounter == 0:
+        bg = background_2
+    elif levelcounter == 1:
+        bg = background_1
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -539,9 +512,11 @@ while is_running:
         if event.type == KEYDOWN and event.key == K_SPACE:
             is_extra_run = True
 
-    screen.blit(background_1, (0, 0))  # Каждую итерацию необходимо всё перерисовывать
+
+    screen.blit(bg, (0, 0))  # Каждую итерацию необходимо всё перерисовывать
 
     camera.update(player)
+    monster_group.update()
     for sprite in all_sprites:
         camera.apply(sprite)
     # проверка того, была ли собрана монетка
@@ -560,6 +535,8 @@ while is_running:
         game_over()
     if lifes_left != 0 and pygame.sprite.spritecollide(player, door_group, True):
         win_level()
+        levelcounter += 1
+        idk_wtf = reset_level(levelcounter)
     pygame.display.update()  # обновление и вывод всех изменений на экран
     clock.tick(FPS)
 pygame.quit()
