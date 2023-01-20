@@ -32,7 +32,8 @@ goose_animation = [pygame.image.load("data/goose_go_left_1.png"), pygame.image.l
                    pygame.image.load("data/goose_left_3.png"), pygame.image.load("data/goose_jump.png"),
                    pygame.image.load("data/goose_jumps_left.png")]
 coin_animation = [pygame.image.load('data/coin1.png'), pygame.image.load('data/coin2.png'),
-                  pygame.image.load('data/coin3.png'), pygame.image.load('data/coin4.png'), pygame.image.load('data/coin5.png')]
+                  pygame.image.load('data/coin3.png'), pygame.image.load('data/coin4.png'),
+                  pygame.image.load('data/coin5.png')]
 clock = pygame.time.Clock()
 # all for start_screen
 color = (255, 255, 255)
@@ -51,6 +52,7 @@ text_lev_3 = smallfont.render('level №3', True, color)
 restart_text = smallfont.render('try again', True, color)
 win_restart_text = smallfont.render('next level', True, color)
 all_win_text = smallfont.render('to main menu', True, color)
+
 
 def draw_text(text, font, text_col, x, y):
     img = font.render(text, True, text_col)
@@ -237,7 +239,7 @@ def win_level():
         else:
             pygame.draw.rect(screen, color_dark, [width / 2.5, height / 1.1, 140, 40])
         if levelcounter != 2:
-             screen.blit(win_restart_text, (width / 2.5 + 10, height / 1.1))
+            screen.blit(win_restart_text, (width / 2.5 + 10, height / 1.1))
         else:
             screen.blit(all_win_text, (width / 2.5 + 10, height / 1.1))
         draw_text('score: ' + str(COINCOUNT), smallfont, 'white', width / 2.5, height / 1.5)
@@ -272,6 +274,7 @@ depth_counter = 0
 lifes_left = 3
 EXTRA_SPEED = 2.5
 EXTRA_JUMP_POWER = 5
+
 
 def sprite_goose():
     value = 0
@@ -314,19 +317,19 @@ class Player(sprite.Sprite):
     def update(self, left, right, up, platforms, is_extra_run):
         if left:
             self.x_speed = -MOVE_SPEED  # Лево = x - n
-            if is_extra_run:  #ускорение
-                self.x_speed -= EXTRA_SPEED # ходьба-ускорение работает
+            if is_extra_run:  # ускорение
+                self.x_speed -= EXTRA_SPEED  # ходьба-ускорение работает
 
         if right:
             self.x_speed = MOVE_SPEED  # Право = x + n
-            if is_extra_run:  #ускорение
-                self.x_speed += EXTRA_SPEED # ходьба-ускорение работает
+            if is_extra_run:  # ускорение
+                self.x_speed += EXTRA_SPEED  # ходьба-ускорение работает
 
         if up:
             if self.onGround:
                 self.y_speed -= JUMP_POWER
                 if is_extra_run and (left or right):  # есть ускорение и движение
-                    self.y_speed -= EXTRA_JUMP_POWER # то прыжок с ускорением
+                    self.y_speed -= EXTRA_JUMP_POWER  # то прыжок с ускорением
 
         if not (left or right):  # стоим, когда нет указаний идти
             self.x_speed = 0
@@ -371,7 +374,6 @@ class Player(sprite.Sprite):
         self.teleport(self.startX, self.startY)
         lifes_left -= 1
 
-
     def teleport(self, moveX, moveY):
         self.rect.x = moveX
         self.rect.y = moveY
@@ -383,7 +385,6 @@ class Platform(sprite.Sprite):
         self.image = Surface((PLATFORM_WIDTH, PLATFORM_HEIGHT))
         self.image = load_image(image)
         self.rect = Rect(x, y, PLATFORM_WIDTH, PLATFORM_HEIGHT)
-
 
 
 class Coin(sprite.Sprite):
@@ -406,7 +407,6 @@ class Danger(sprite.Sprite):
         self.image = load_image(image)
         self.image.set_colorkey(Color(COLOR))
 
-
     def player_die(self):
         time.delay(50)
         self.teleport(self.startX, self.startY)
@@ -414,8 +414,6 @@ class Danger(sprite.Sprite):
     def teleport(self, moveX, moveY):
         self.rect.x = moveX
         self.rect.y = moveY
-
-
 
 
 class Monster(sprite.Sprite):
@@ -448,14 +446,16 @@ class End_portal(sprite.Sprite):
         levelcounter += 1
 
 
-
 left = right = up = is_extra_run = False  # по умолчанию — стоим
 
 all_sprites = pygame.sprite.Group()  # Все объекты, кроме монет
 coin_group = pygame.sprite.Group()  # монеты
-door_group = pygame.sprite.Group() # портал
-monster_group = pygame.sprite.Group() # монстр
+door_group = pygame.sprite.Group()  # портал
+monster_group = pygame.sprite.Group()  # монстр
 platforms = []  # то, во что мы будем врезаться или опираться
+
+pygame.mixer.music.load('game_music.mp3')
+pygame.mixer.music.play()
 
 level_m = ["-                                 ",
            "-            --                   ",
@@ -513,8 +513,6 @@ for row in level_m:  # вся строка
     y += PLATFORM_HEIGHT  # то же самое и с высотой
     x = 0  # на каждой новой строчке начинаем с нуля
 
-
-
 start_screen()
 camera = Camera()
 FPS = 60
@@ -540,7 +538,6 @@ while is_running:
             is_extra_run = False
         if event.type == KEYDOWN and event.key == K_SPACE:
             is_extra_run = True
-
 
     screen.blit(background_1, (0, 0))  # Каждую итерацию необходимо всё перерисовывать
 
