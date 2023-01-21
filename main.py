@@ -28,9 +28,9 @@ background_1 = load_image('simple_blue_fon.jpg')
 background_2 = load_image('forest_with_deers.jpg')
 background_3 = load_image('desert_broun.jpg')
 
-coin_animation = [pygame.image.load('data/coin1.png'), pygame.image.load('data/coin2.png'),
-                  pygame.image.load('data/coin3.png'), pygame.image.load('data/coin4.png'),
-                  pygame.image.load('data/coin5.png')]
+# coin_animation = [pygame.image.load('data/coin1.png'), pygame.image.load('data/coin2.png'),
+#                   pygame.image.load('data/coin3.png'), pygame.image.load('data/coin4.png'),
+#                   pygame.image.load('data/coin5.png')]
 
 clock = pygame.time.Clock()
 # all for start_screen
@@ -153,7 +153,7 @@ def change_level():
 
 def start_screen():
     global level_counter
-    fon = pygame.transform.scale(load_image('start_screen.jpg'), (width, height))
+    fon = pygame.transform.scale(load_image('win_screen.png'), (width, height))
     screen.blit(fon, (0, 0))
 
     while True:
@@ -279,10 +279,10 @@ EXTRA_JUMP_POWER = 5
 
 class Player(sprite.Sprite):
     def __init__(self, x, y):
-        sprite.Sprite.__init__(self)
+        super().__init__()
         self.reset(x, y)
 
-    def update(self, left, right, up, platforms, is_extra_run):
+    def move(self, left, right, up, platforms, is_extra_run, frame_delay):
         if left:
             self.x_speed = -MOVE_SPEED  # Лево = x - n
             if is_extra_run:  # ускорение
@@ -360,31 +360,51 @@ class Player(sprite.Sprite):
 
 class Platform(sprite.Sprite):
     def __init__(self, x, y, image):
-        sprite.Sprite.__init__(self)
-        self.image = Surface((PLATFORM_WIDTH, PLATFORM_HEIGHT))
+        super().__init__(all_sprites)
         self.image = load_image(image)
         self.rect = Rect(x, y, PLATFORM_WIDTH, PLATFORM_HEIGHT)
 
 
-class Coin(sprite.Sprite):
-    def __init__(self, x, y, image):
-        sprite.Sprite.__init__(self)
-        self.image = Surface((PLATFORM_WIDTH, PLATFORM_HEIGHT))
-        self.image = load_image(image)
-        self.rect = Rect(x, y, PLATFORM_WIDTH, PLATFORM_HEIGHT)
-        self.image.set_colorkey(Color(COLOR))
-        self.x = x
-        self.y = y
+class AnimatedSprite(pygame.sprite.Sprite):
+    def __init__(self, sheet, columns, rows, x, y, *groups):
+        super().__init__(*groups)
+        self.frames = []
+        self.cut_sheet(sheet, columns, rows)
+        self.cur_frame = 0
+        self.image = self.frames[self.cur_frame]
+        self.rect = self.rect.move(x, y)
 
-    def update(self):
-        pass
+    def cut_sheet(self, sheet, columns, rows):
+        self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
+                                sheet.get_height() // rows)
+        for j in range(rows):
+            for i in range(columns):
+                frame_location = (self.rect.w * i, self.rect.h * j)
+                self.frames.append(sheet.subsurface(pygame.Rect(
+                    frame_location, self.rect.size)))
+
+    def update(self, animation_tick=False):
+        if not animation_tick:
+            return
+        self.cur_frame = (self.cur_frame + 1) % len(self.frames)
+        self.image = self.frames[self.cur_frame]
+
+
+COIN_ANIMATION_EVENT = pygame.USEREVENT + 1
+
+
+class Coin(AnimatedSprite):
+    def __init__(self, x: int, y: int, image_name):
+        image = load_image(image_name)
+        super().__init__(image, 6, 1, x, y, all_sprites)
 
 
 class Danger(sprite.Sprite):
     def __init__(self, x, y, image):
-        Platform.__init__(self, x, y, image)
+        super().__init__()
         self.image = load_image(image)
         self.image.set_colorkey(Color(COLOR))
+        self.rect = self.image.get_rect().move(x, y)
 
     def player_die(self):
         time.delay(50)
@@ -397,12 +417,10 @@ class Danger(sprite.Sprite):
 
 class Monster(sprite.Sprite):
     def __init__(self, x, y, image):
-        Platform.__init__(self, x, y, image)
+        super().__init__(all_sprites)
         self.image = load_image(image)
         self.image.set_colorkey(Color(COLOR))
-        self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
+        self.rect = self.image.get_rect().move(x, y)
         self.move_direction = 1
         self.move_counter = 0
 
@@ -416,9 +434,10 @@ class Monster(sprite.Sprite):
 
 class End_portal(sprite.Sprite):
     def __init__(self, x, y, image):
-        Platform.__init__(self, x, y, image)
+        super().__init__()
         self.image = load_image(image)
         self.image.set_colorkey(Color(COLOR))
+        self.rect = self.image.get_rect().move(x, y)
 
 
 left = right = up = is_extra_run = False  # по умолчанию — стоим
@@ -459,27 +478,27 @@ for row in level_1:  # вся строка
             pf = Platform(x, y, 'block.png')
             all_sprites.add(pf)
             platforms.append(pf)
-        if col == '$':
-            cn = Coin(x, y, 'coin0.png')
+        elif col == '$':
+            cn = Coin(x, y, 'coin.png')
             all_sprites.add(cn)
             coin_group.add(cn)
-        if col == 'P':
+        elif col == 'P':
             pl = Platform(x, y, 'wood_block.png')
             all_sprites.add(pl)
             platforms.append(pl)
-        if col == '*':
+        elif col == '*':
             dan = Danger(x, y, 'lovushka.png')
             all_sprites.add(dan)
             platforms.append(dan)
-        if col == '!':
+        elif col == '!':
             next_l = End_portal(x, y, 'door.png')
             all_sprites.add(next_l)
             door_group.add(next_l)
-        if col == 'M':
+        elif col == 'M':
             mon = Monster(x, y, 'monster.png')
             all_sprites.add(mon)
             monster_group.add(mon)
-        if col == 'G':
+        elif col == 'G':
             player = Player(x, y)
             all_sprites.add(player)
 
@@ -492,12 +511,10 @@ camera = Camera()
 FPS = 60
 bg = background_1
 is_running = True
-while is_running:
-    if level_counter == 0:
-        bg = background_2
-    elif level_counter == 1:
-        bg = background_1
+frame_delay = 0
+pygame.time.set_timer(COIN_ANIMATION_EVENT, 200)
 
+while is_running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             is_running = False
@@ -517,13 +534,20 @@ while is_running:
             is_extra_run = False
         if event.type == KEYDOWN and event.key == K_SPACE:
             is_extra_run = True
+        if event.type == COIN_ANIMATION_EVENT:
+            coin_group.update(animation_tick=True)
 
-    screen.blit(bg, (0, 0))  # Каждую итерацию необходимо всё перерисовывать
+    if level_counter == 0:
+        bg = background_2
+    elif level_counter == 1:
+        bg = background_1
+
+    all_sprites.update()
 
     camera.update(player)
-    monster_group.update()
     for sprite in all_sprites:
         camera.apply(sprite)
+
     # проверка того, была ли собрана монетка
     if pygame.sprite.spritecollide(player, coin_group, True):
         COINCOUNT += 1
@@ -532,16 +556,17 @@ while is_running:
     draw_text('score: ' + str(COINCOUNT), smallfont, 'white', PLATFORM_WIDTH, 20)
     draw_text('lives_left: ' + str(lives_left), smallfont, 'white', PLATFORM_WIDTH, 60)
 
-    all_sprites.draw(screen)
-    coin_group.draw(screen)
-    monster_group.draw(screen)
-    player.update(left, right, up, platforms, is_extra_run)
+    player.move(left, right, up, platforms, is_extra_run, frame_delay)
     if lives_left == 0:
         game_over()
     if lives_left != 0 and pygame.sprite.spritecollide(player, door_group, True):
         win_level()
         level_counter += 1
         idk_wtf = reset_level(level_counter)
+
+    screen.blit(bg, (0, 0))  # Каждую итерацию необходимо всё перерисовывать
+    all_sprites.draw(screen)
+
     pygame.display.update()  # обновление и вывод всех изменений на экран
-    clock.tick(FPS)
+    frame_delay = clock.tick(FPS) / 1000
 pygame.quit()
