@@ -1,6 +1,7 @@
 from pygame import *
 import sys
 import os
+import math
 import pygame
 
 
@@ -44,7 +45,7 @@ text_lev_2 = smallfont.render('level №2', True, color)
 text_lev_3 = smallfont.render('level №3', True, color)
 restart_text = smallfont.render('try again', True, color)
 win_restart_text = smallfont.render('next level', True, color)
-all_win_text = smallfont.render('main', True, color)
+all_win_text = smallfont.render('to main menu', True, color)
 level_counter = 0
 
 
@@ -171,7 +172,7 @@ def change_level():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if width / 2.5 <= mouse[0] <= width / 2.5 + 200 and height / 2 <= mouse[1] <= height / 2 + 60:
                     # need to add first level
-                    level_counter += 1
+                    level_counter = 1
                     set_level(level_counter)
                     return
 
@@ -495,8 +496,8 @@ door_group = pygame.sprite.Group()  # портал
 monster_group = pygame.sprite.Group()  # монстр
 platforms = []  # то, во что мы будем врезаться или опираться
 
-#pygame.mixer.music.load('data/game_music.mp3')
-#pygame.mixer.music.play()
+pygame.mixer.music.load('data/game_music.mp3')
+pygame.mixer.music.play()
 level = []
 level_1 = ["-                                                                   -",
            "-                     --                                            -",
@@ -519,26 +520,25 @@ level_1 = ["-                                                                   
            "-G                  P             $$                                -",
            "----------PP---------------------------------------------------------"]
 
-level_2 = ["-                                                              -",
-           "-            --                     $ M                        -",
-           "-                                  ------                      -",
-           "-                   $               -                          -",
-           "-                   ----     ---                    $          -",
-           "-                                                   -          -",
-           "-                                                 ---         --",
-           "-           **                 $$              M               -",
-           "-                            -------         ----              -",
-           "-                           -----------                        -",
-           "-                                     ---                      -",
-           "-     ---        M          *                                  -",
-           "-       $ $     ----                                           -",
-           "-           ----                     M               $     !   -",
-           "-   --------                      --PPP--        -- --PPPPP-----",
-           "-  -                      -      ---   ---       --             ",
-           "-                          ---------   -----    --              ",
-           "-            **                  ---   ---------       ---------",
-           "-G       !-      $              ----   ---------     -----------",
-           "----------------------------------------------------------------"]
+level_2 = ["-            --                   ",
+           "-                                 ",
+           "-            *                     ",
+           "-                   ----     ---  ",
+           "- *                                ",
+           "-                                 ",
+           "-            *                    ",
+           "-                            ---  ",
+           "-       *                         ",
+           "-                                 ",
+           "-     ---        M          *    -",
+           "-       $ $     ----             -",
+           "-           ----                 -",
+           "-   --------         *            -",
+           "-  -                      -  !  * -",
+           "-                          -------",
+           "-           ***                  -",
+           "-G        -                     --",
+           "----------------------------------"]
 
 start_screen()
 camera = Camera()
@@ -576,9 +576,9 @@ while is_running:
     all_sprites.update()
 
     camera.update(player)
+    monster_group.update()
     for sprite in all_sprites:
         camera.apply(sprite)
-
     # проверка того, была ли собрана монетка
     if pygame.sprite.spritecollide(player, coin_group, True):
         COINCOUNT += 1
