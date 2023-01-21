@@ -1,7 +1,6 @@
 from pygame import *
 import sys
 import os
-import math
 import pygame
 
 
@@ -26,11 +25,7 @@ pygame.display.set_caption('Goose-adventurer')
 
 background_1 = load_image('simple_blue_fon.jpg')
 background_2 = load_image('forest_with_deers.jpg')
-background_3 = load_image('desert_broun.jpg')
-
-# coin_animation = [pygame.image.load('data/coin1.png'), pygame.image.load('data/coin2.png'),
-#                   pygame.image.load('data/coin3.png'), pygame.image.load('data/coin4.png'),
-#                   pygame.image.load('data/coin5.png')]
+# background_3 = load_image('desert_broun.jpg')
 
 clock = pygame.time.Clock()
 # all for start_screen
@@ -58,11 +53,62 @@ def draw_text(text, font, text_col, x, y):
     screen.blit(img, (x, y))
 
 
-def reset_level(level):
-    player.reset(50, 50)
+def set_level(level_counter):
+    global bg, level
+
     monster_group.empty()
     coin_group.empty()
     door_group.empty()
+    all_sprites.empty()
+
+    if level_counter == 0:
+        bg = background_2
+        level = level_1
+    elif level_counter == 1:
+        bg = background_1
+        level = level_2
+
+    create_level_sprites()
+
+
+def create_level_sprites():
+    global player, left, right, up, is_extra_run, platforms
+    left = right = up = is_extra_run = False  # по умолчанию — стоим
+    x = y = 0  # координаты
+    platforms = []
+    for row in level:  # вся строка
+        for col in row:  # каждый символ
+            if col == "-":
+                pf = Platform(x, y, 'block.png')
+                all_sprites.add(pf)
+                platforms.append(pf)
+            elif col == '$':
+                cn = Coin(x, y, 'coin.png')
+                all_sprites.add(cn)
+                coin_group.add(cn)
+            elif col == 'P':
+                pl = Platform(x, y, 'wood_block.png')
+                all_sprites.add(pl)
+                platforms.append(pl)
+            elif col == '*':
+                dan = Danger(x, y, 'lovushka.png')
+                all_sprites.add(dan)
+                platforms.append(dan)
+            elif col == '!':
+                next_l = End_portal(x, y, 'door.png')
+                all_sprites.add(next_l)
+                door_group.add(next_l)
+            elif col == 'M':
+                mon = Monster(x, y, 'monster.png')
+                all_sprites.add(mon)
+                monster_group.add(mon)
+            elif col == 'G':
+                player = Player(x, y)
+                all_sprites.add(player)
+
+            x += PLATFORM_WIDTH  # блоки платформы ставятся на ширине блоков
+        y += PLATFORM_HEIGHT  # то же самое и с высотой
+        x = 0  # на каждой новой строчке начинаем с нуля
 
 
 def instruction():
@@ -197,10 +243,6 @@ def start_screen():
         pygame.display.update()
 
 
-def level_changer():
-    pass
-
-
 def game_over():
     fon = pygame.transform.scale(load_image('game_over.jpg'), (width, height))
     screen.blit(fon, (0, 0))
@@ -314,11 +356,9 @@ class Player(sprite.Sprite):
         for p in platforms:
             if pygame.sprite.collide_rect(self, p):  # если есть пересечение платформы с игроком
                 if isinstance(p, Danger) or isinstance(p, Monster):  # если пересакаемый блок - Danger или Monster
-                    self.depth()
-                # elif isinstance(p, Coin):
-                # self.get_profit()
-                elif isinstance(p, End_portal):
-                    self.teleport(self.startX, self.startY)
+                    self.death()
+                # elif isinstance(p, End_portal):
+                # self.teleport(self.startX, self.startY)
 
                 else:
                     if x_speed > 0:  # если движется вправо
@@ -336,7 +376,7 @@ class Player(sprite.Sprite):
                         self.rect.top = p.rect.bottom  # то не движется вверх
                         self.y_speed = 0
 
-    def depth(self):
+    def death(self):
         global lives_left
         time.wait(500)
         self.teleport(self.startX, self.startY)
@@ -450,8 +490,29 @@ platforms = []  # то, во что мы будем врезаться или о
 
 pygame.mixer.music.load('game_music.mp3')
 pygame.mixer.music.play()
-
+level = []
 level_1 = ["-                                 ",
+           "-            --                   ",
+           "-                                 ",
+           "-                                 ",
+           "-                   ----     ---  ",
+           "-                                 ",
+           "-                                 ",
+           "-            *                    ",
+           "-                            ---  ",
+           "-                                 ",
+           "-                                 ",
+           "-     ---        M          *    -",
+           "-       $ $     ----             -",
+           "-           ----                 -",
+           "-   --------                     -",
+           "-  -                      -G !   -",
+           "-                          -------",
+           "-           ***                  -",
+           "-         P                     --",
+           "----------PP----------------------"]
+
+level_2 = ["-                                 ",
            "-            --                   ",
            "-                                 ",
            "-                                 ",
@@ -469,42 +530,8 @@ level_1 = ["-                                 ",
            "-  -                      -  !   -",
            "-                          -------",
            "-           ***                  -",
-           "-G        P                     --",
-           "----------PP----------------------"]
-x = y = 0  # координаты
-for row in level_1:  # вся строка
-    for col in row:  # каждый символ
-        if col == "-":
-            pf = Platform(x, y, 'block.png')
-            all_sprites.add(pf)
-            platforms.append(pf)
-        elif col == '$':
-            cn = Coin(x, y, 'coin.png')
-            all_sprites.add(cn)
-            coin_group.add(cn)
-        elif col == 'P':
-            pl = Platform(x, y, 'wood_block.png')
-            all_sprites.add(pl)
-            platforms.append(pl)
-        elif col == '*':
-            dan = Danger(x, y, 'lovushka.png')
-            all_sprites.add(dan)
-            platforms.append(dan)
-        elif col == '!':
-            next_l = End_portal(x, y, 'door.png')
-            all_sprites.add(next_l)
-            door_group.add(next_l)
-        elif col == 'M':
-            mon = Monster(x, y, 'monster.png')
-            all_sprites.add(mon)
-            monster_group.add(mon)
-        elif col == 'G':
-            player = Player(x, y)
-            all_sprites.add(player)
-
-        x += PLATFORM_WIDTH  # блоки платформы ставятся на ширине блоков
-    y += PLATFORM_HEIGHT  # то же самое и с высотой
-    x = 0  # на каждой новой строчке начинаем с нуля
+           "-G        -                     --",
+           "----------------------------------"]
 
 start_screen()
 camera = Camera()
@@ -513,6 +540,8 @@ bg = background_1
 is_running = True
 frame_delay = 0
 pygame.time.set_timer(COIN_ANIMATION_EVENT, 200)
+
+set_level(level_counter)
 
 while is_running:
     for event in pygame.event.get():
@@ -537,11 +566,6 @@ while is_running:
         if event.type == COIN_ANIMATION_EVENT:
             coin_group.update(animation_tick=True)
 
-    if level_counter == 0:
-        bg = background_2
-    elif level_counter == 1:
-        bg = background_1
-
     all_sprites.update()
 
     camera.update(player)
@@ -562,7 +586,7 @@ while is_running:
     if lives_left != 0 and pygame.sprite.spritecollide(player, door_group, True):
         win_level()
         level_counter += 1
-        idk_wtf = reset_level(level_counter)
+        set_level(level_counter)
 
     screen.blit(bg, (0, 0))  # Каждую итерацию необходимо всё перерисовывать
     all_sprites.draw(screen)
