@@ -83,7 +83,7 @@ def create_level_sprites():
                 pf = Platform(x, y, 'block.png')
                 all_sprites.add(pf)
                 platforms.append(pf)
-            if col == ".":
+            elif col == ".":
                 pf = Platform(x, y, 'iron_block.png')
                 all_sprites.add(pf)
                 platforms.append(pf)
@@ -344,10 +344,12 @@ class Player(sprite.Sprite):
     def collide(self, x_speed, y_speed, platforms):
         for p in platforms:
             if pygame.sprite.collide_rect(self, p):
-                if isinstance(p, Danger) or isinstance(p, Monster):  # если пересакаемый блок - Danger или Monster
+                if isinstance(p, Danger) or isinstance(p, Monster):  # если пересекаемый блок - Danger или Monster
                     self.death()
-                    # elif isinstance(p, End_portal):
-                    # self.teleport(self.startX, self.startY)
+                # elif isinstance(p, End_portal):
+                # self.teleport(self.startX, self.startY)
+
+                else:
                     if x_speed > 0:
                         self.rect.right = p.rect.left
                     elif x_speed < 0:
@@ -367,15 +369,16 @@ class Player(sprite.Sprite):
         self.teleport(self.startX, self.startY)
         lives_left -= 1
 
+
     def teleport(self, moveX, moveY):
         self.rect.x = moveX
         self.rect.y = moveY
 
     def reset(self, x, y):
-        self.x_speed = 0  # скорость перемещения. 0 - стоять на месте
-        self.startX = x  # Начальная позиция Х
-        self.y_speed = 0  # скорость вертикального перемещения
-        self.onGround = False  # На земле ли я?
+        self.x_speed = 0
+        self.startX = x
+        self.y_speed = 0
+        self.onGround = False
         self.startY = y
         self.image = Surface((WIDTH, HEIGHT))
         self.image = load_image('gose.png')
@@ -431,14 +434,14 @@ class Danger(sprite.Sprite):
         self.image.set_colorkey(Color(COLOR))
         self.rect = self.image.get_rect().move(x, y)
 
-    # def player_die(self):
-    # global
-    # time.delay(50)
-    # self.teleport(startX, startY)
+    #def player_die(self):
+        #global
+        #time.delay(50)
+        #self.teleport(startX, startY)
 
-    # def teleport(self, moveX, moveY):
-    # self.rect.x = moveX
-    # self.rect.y = moveY
+    #def teleport(self, moveX, moveY):
+       # self.rect.x = moveX
+        #self.rect.y = moveY
 
 
 class Monster(sprite.Sprite):
