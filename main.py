@@ -18,7 +18,7 @@ PLATFORM_WIDTH = 32
 PLATFORM_HEIGHT = 32
 
 width = 800
-height = 640
+height = 670
 display = (width, height)
 pygame.init()
 screen = pygame.display.set_mode(display)
@@ -45,7 +45,7 @@ text_lev_2 = smallfont.render('level №2', True, color)
 text_lev_3 = smallfont.render('level №3', True, color)
 restart_text = smallfont.render('try again', True, color)
 win_restart_text = smallfont.render('next level', True, color)
-all_win_text = smallfont.render('to main menu', True, color)
+all_win_text = smallfont.render('menu', True, color)
 level_counter = 0
 
 
@@ -81,6 +81,10 @@ def create_level_sprites():
         for col in row:
             if col == "-":
                 pf = Platform(x, y, 'block.png')
+                all_sprites.add(pf)
+                platforms.append(pf)
+            if col == ".":
+                pf = Platform(x, y, 'iron_block.png')
                 all_sprites.add(pf)
                 platforms.append(pf)
             elif col == '$':
@@ -133,28 +137,6 @@ def instruction():
             pygame.draw.rect(screen, color_dark, [width / 1.2, height / 24, 150, 40])
         screen.blit(back_button, (width / 1.2 + 5, height / 24))
 
-        pygame.display.update()
-
-
-def wrong_message():
-    fon = pygame.transform.scale(load_image('wrong_message.png'), (width, height))
-    screen.blit(fon, (0, 0))
-
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-            if width / 1.2 <= mouse[0] <= width / 1.2 + 140 and height / 24 <= mouse[1] <= height / 24 + 40:
-                return start_screen()
-
-        mouse = pygame.mouse.get_pos()
-
-        if width / 1.2 <= mouse[0] <= width / 1.2 + 140 and height / 24 <= mouse[1] <= height / 24 + 40:
-            pygame.draw.rect(screen, color_light, [width / 1.2, height / 24, 150, 40])
-
-        else:
-            pygame.draw.rect(screen, color_dark, [width / 1.2, height / 24, 150, 40])
-        screen.blit(back_button, (width / 1.2 + 5, height / 24))
         pygame.display.update()
 
 
@@ -282,7 +264,7 @@ def win_level():
             # checks if a mouse is clicked
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if width / 2.5 <= mouse[0] <= width / 2.5 + 140 and height / 1.1 <= mouse[1] <= height / 1.1 + 40:
-                    return
+                    return start_screen()
         mouse = pygame.mouse.get_pos()
         if width / 2.5 <= mouse[0] <= width / 2.5 + 140 and height / 1.1 <= mouse[1] <= height / 1.1 + 40:
             pygame.draw.rect(screen, color_light, [width / 2.5, height / 1.1, 140, 40])
@@ -335,20 +317,20 @@ class Player(sprite.Sprite):
         if left:
             self.x_speed = -MOVE_SPEED  # Лево = x - n
             if is_extra_run:  # ускорение
-                self.x_speed -= EXTRA_SPEED  # ходьба-ускорение работает
+                self.x_speed -= EXTRA_SPEED  # ходьба-ускорение
 
         if right:
             self.x_speed = MOVE_SPEED  # Право = x + n
             if is_extra_run:  # ускорение
-                self.x_speed += EXTRA_SPEED  # ходьба-ускорение работает
+                self.x_speed += EXTRA_SPEED  # ходьба-ускорение
 
         if up:
             if self.onGround:
                 self.y_speed -= JUMP_POWER
-                if is_extra_run and (left or right):  # есть ускорение и движение
+                if is_extra_run and (left or right):  # ускорение и движение
                     self.y_speed -= EXTRA_JUMP_POWER  # то прыжок с ускорением
 
-        if not (left or right):  # стоим, когда нет указаний идти
+        if not (left or right):  # стоим
             self.x_speed = 0
         if not self.onGround:
             self.y_speed += GRAVITY
@@ -361,26 +343,22 @@ class Player(sprite.Sprite):
 
     def collide(self, x_speed, y_speed, platforms):
         for p in platforms:
-            if pygame.sprite.collide_rect(self, p):  # если есть пересечение платформы с игроком
+            if pygame.sprite.collide_rect(self, p):
                 if isinstance(p, Danger) or isinstance(p, Monster):  # если пересакаемый блок - Danger или Monster
                     self.death()
-                # elif isinstance(p, End_portal):
-                # self.teleport(self.startX, self.startY)
+                    # elif isinstance(p, End_portal):
+                    # self.teleport(self.startX, self.startY)
+                    if x_speed > 0:
+                        self.rect.right = p.rect.left
+                    elif x_speed < 0:
+                        self.rect.left = p.rect.right
+                    elif y_speed > 0:
+                        self.rect.bottom = p.rect.top
+                        self.onGround = True
+                        self.y_speed = 0
 
-                else:
-                    if x_speed > 0:  # если движется вправо
-                        self.rect.right = p.rect.left  # то не движется вправо
-
-                    if x_speed < 0:  # если движется влево
-                        self.rect.left = p.rect.right  # то не движется влево
-
-                    if y_speed > 0:  # если падает вниз
-                        self.rect.bottom = p.rect.top  # то не падает вниз
-                        self.onGround = True  # и становится на что-то твердое
-                        self.y_speed = 0  # и энергия падения пропадает
-
-                    if y_speed < 0:  # если движется вверх
-                        self.rect.top = p.rect.bottom  # то не движется вверх
+                    elif y_speed < 0:
+                        self.rect.top = p.rect.bottom
                         self.y_speed = 0
 
     def death(self):
@@ -453,14 +431,14 @@ class Danger(sprite.Sprite):
         self.image.set_colorkey(Color(COLOR))
         self.rect = self.image.get_rect().move(x, y)
 
-    #def player_die(self):
-        #global
-        #time.delay(50)
-        #self.teleport(startX, startY)
+    # def player_die(self):
+    # global
+    # time.delay(50)
+    # self.teleport(startX, startY)
 
-    #def teleport(self, moveX, moveY):
-       # self.rect.x = moveX
-        #self.rect.y = moveY
+    # def teleport(self, moveX, moveY):
+    # self.rect.x = moveX
+    # self.rect.y = moveY
 
 
 class Monster(sprite.Sprite):
@@ -488,58 +466,59 @@ class End_portal(sprite.Sprite):
         self.rect = self.image.get_rect().move(x, y)
 
 
-left = right = up = is_extra_run = False  # по умолчанию — стоим
+left = right = up = is_extra_run = False
 
 all_sprites = pygame.sprite.Group()  # Все объекты, кроме монет
 coin_group = pygame.sprite.Group()  # монеты
 door_group = pygame.sprite.Group()  # портал
 monster_group = pygame.sprite.Group()  # монстр
-platforms = []  # то, во что мы будем врезаться или опираться
+platforms = []
 
 pygame.mixer.music.load('data/game_music.mp3')
 pygame.mixer.music.play()
-level = []
 level_1 = ["-                                                                   -",
-           "-                     --                                            -",
            "-                                                                   -",
-           "-                           $                                       -",
-           "-                          ---             ---           $$         -",
-           "-                                 --                   -----        -",
-           "-                    *                          M                   -",
-           "-        ---   M                         $   ------                 -",
-           "-             ----                      ----                        -",
-           "-    $$   *                                                         -",
-           "-    $$                        --        *                     $    -",
-           "-    --                    M                               M  --    -",
-           "-                $ $     ----                 $ $         ---       -",
-           "- *                  ----                            ---      -     -",
-           "-            --------                        --------         -     -",
-           "-          --                             **                  - !   -",
-           "-        --                             ------                -------",
-           "-                     **                                            -",
-           "-G                  P             $$                                -",
-           "----------PP---------------------------------------------------------"]
+           "-                                                                   -",
+           "-                                                                   -",
+           "-       $$                   $        *                             -",
+           "-      ----         --      ---             ---      $$             -",
+           "-                             --                   ----             -",
+           "-                       *                          M                -",
+           "-$                M                      $      ------              -",
+           "--       $      -----                  ----                         -",
+           "-       $ $   *                           *                         -",
+           "-       ---                      --                            $    -",
+           "- $                         M                              M  --    -",
+           "-                $        ----                 $ $        --- -     -",
+           "----                    ----                           -      -     -",
+           "-            -------                         --------         -  *  -",
+           "-          --                             **                  -  !  -",
+           "-        --                             ------                ---P---",
+           "-                     *                                          $ $-",
+           "-G                  -             $$                            $ $ -",
+           "---------------------------------------------------------------------"]
 
-level_2 = ["-                                                               ",
-           "-            --                       M                         ",
-           "-                                  ------                       ",
-           "-                   $               -                           ",
-           "-                   ----     ---                                ",
-           "-                                                               ",
-           "-                                                               ",
-           "-           **                 $$                               ",
-           "-                            -------                            ",
-           "-                           -----------                         ",
-           "-                                     ---                       ",
-           "-     ---        M          *                                   ",
-           "-       $ $     ----                                            ",
-           "-           ----                     M               $     !    ",
-           "-   --------                      --PPP--        -- --PPPPP--   ",
-           "-  -                      -      ---   ---       --             ",
-           "-                          ---------   -----    --              ",
-           "-            **                  ---   ---------       ---------",
-           "-G       !-      $              ----   ---------     -----------",
-           "----------------------------------------------------------------"]
+level_2 = [".                                                               .",
+           ".                                                               .",
+           ".          ...                          M                       .",
+           ".   $$                               ......                     .",
+           ".   $$            *    $ $       *                $             .",
+           ".  ...                ....     ...               $ $            .",
+           ".                                                ...            .",
+           ".$                                                              .",
+           "..          **                 $$                               .",
+           ".                            ......                             .",
+           ".                                                               .",
+           ".      $                              ...                       .",
+           ".     ...         M          *                                **.",
+           ".               .....                                           .",
+           ".          ...                       M                     !    .",
+           ".   ........                      ........             ..........",
+           ".  .                             ... $ ....                 $ $ .",
+           ".                            ....... $ .....               $ $ $.",
+           ".            **                  ...   ......              ......",
+           ".G       .      $                       $.....            .......",
+           "................................................................."]
 
 start_screen()
 camera = Camera()
@@ -599,6 +578,6 @@ while is_running:
     screen.blit(bg, (0, 0))  # Каждую итерацию необходимо всё перерисовывать
     all_sprites.draw(screen)
 
-    pygame.display.update()  # обновление и вывод всех изменений на экран
+    pygame.display.update()
     frame_delay = clock.tick(FPS) / 1000
 pygame.quit()
