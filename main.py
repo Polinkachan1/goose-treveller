@@ -16,10 +16,10 @@ def load_image(name, colorkey=None):
 PLATFORM_WIDTH = 32
 PLATFORM_HEIGHT = 32
 
-width = 800  # Ширина создаваемого окна
-height = 640  # Высота
-display = (width, height)  # Группируем ширину и высоту в одну переменную
-pygame.init()  # Инициация PyGame, обязательная строчка
+width = 800
+height = 640
+display = (width, height)
+pygame.init()
 screen = pygame.display.set_mode(display)
 pygame.display.set_caption('Goose-adventurer')
 
@@ -76,8 +76,8 @@ def create_level_sprites():
     left = right = up = is_extra_run = False  # по умолчанию — стоим
     x = y = 0  # координаты
     platforms = []
-    for row in level:  # вся строка
-        for col in row:  # каждый символ
+    for row in level:
+        for col in row:
             if col == "-":
                 pf = Platform(x, y, 'block.png')
                 all_sprites.add(pf)
@@ -199,7 +199,7 @@ def change_level():
 
 def start_screen():
     global level_counter
-    fon = pygame.transform.scale(load_image('win_screen.png'), (width, height))
+    fon = pygame.transform.scale(load_image('start_screen.jpg'), (width, height))
     screen.blit(fon, (0, 0))
 
     while True:
@@ -488,46 +488,45 @@ door_group = pygame.sprite.Group()  # портал
 monster_group = pygame.sprite.Group()  # монстр
 platforms = []  # то, во что мы будем врезаться или опираться
 
-pygame.mixer.music.load('game_music.mp3')
+pygame.mixer.music.load('data/game_music.mp3')
 pygame.mixer.music.play()
 level = []
-level_1 = ["-                                 ",
-           "-            --                   ",
-           "-                                 ",
-           "-                                 ",
-           "-                   ----     ---  ",
-           "-                                 ",
-           "-                                 ",
-           "-            *                    ",
-           "-                            ---  ",
-           "-                                 ",
-           "-                                 ",
-           "-     ---        M          *    -",
-           "-       $ $     ----             -",
-           "-           ----                 -",
-           "-   --------                     -",
-           "-  -                      -G !   -",
-           "-                          -------",
-           "-           ***                  -",
-           "-         P                     --",
-           "----------PP----------------------"]
+level_1 = ["-                                                                   -",
+           "-                     --                                            -",
+           "-                                                                   -",
+           "-                           $                                       -",
+           "-                          ---             ---           $$         -",
+           "-                                 --                   -----        -",
+           "-                    *                          M                   -",
+           "-        ---   M                         $   ------                 -",
+           "-             ----                      ----                        -",
+           "-    $$   *                                                         -",
+           "-    $$                        --        *                     $    -",
+           "-    --                    M                               M  --    -",
+           "-                $ $     ----                 $ $         ---       -",
+           "- *                  ----                            ---      -     -",
+           "-            --------                        --------         -     -",
+           "-          --                             **                  - !   -",
+           "-        --                             ------                -------",
+           "-                     **                                            -",
+           "-G                  P             $$                                -",
+           "----------PP---------------------------------------------------------"]
 
-level_2 = ["-                                 ",
-           "-            --                   ",
+level_2 = ["-            --                   ",
            "-                                 ",
-           "-                                 ",
+           "-            *                     ",
            "-                   ----     ---  ",
-           "-                                 ",
+           "- *                                ",
            "-                                 ",
            "-            *                    ",
            "-                            ---  ",
-           "-                                 ",
+           "-       *                         ",
            "-                                 ",
            "-     ---        M          *    -",
            "-       $ $     ----             -",
            "-           ----                 -",
-           "-   --------                     -",
-           "-  -                      -  !   -",
+           "-   --------         *            -",
+           "-  -                      -  !  * -",
            "-                          -------",
            "-           ***                  -",
            "-G        -                     --",
