@@ -24,7 +24,7 @@ screen = pygame.display.set_mode(display)
 pygame.display.set_caption('Goose-adventurer')
 
 background_1 = load_image('simple_blue_fon.jpg')
-background_2 = load_image('forest_with_deers.jpg')
+background_2 = load_image('fon.png')
 # background_3 = load_image('desert_broun.jpg')
 
 clock = pygame.time.Clock()
@@ -120,7 +120,7 @@ def create_level_sprites():
 
 
 def instruction():
-    fon = pygame.transform.scale(load_image('instruction.jpg'), (width, height))
+    fon = pygame.transform.scale(load_image('instruction.png'), (width, height))
     screen.blit(fon, (0, 0))
 
     while True:
@@ -363,9 +363,8 @@ class Player(sprite.Sprite):
         if up:
             if self.onGround:
                 self.y_speed -= JUMP_POWER
-                if is_extra_run and (left or right): #and right:  # ускорение и движение
-                    self.y_speed -= EXTRA_JUMP_POWER  # то прыжок с ускорением
-
+                if is_extra_run and (left or right):   # ускорение и движение
+                    self.y_speed -= EXTRA_JUMP_POWER  # прыжок с ускорением
 
         if not (left or right) and not is_extra_run:  # стоим
             self.x_speed = 0
