@@ -55,7 +55,7 @@ def draw_text(text, font, text_col, x, y):
 
 
 def set_level(level_counter):
-    global bg, level
+    global bg, level, COINCOUNT, lives_left
 
     monster_group.empty()
     coin_group.empty()
@@ -65,9 +65,14 @@ def set_level(level_counter):
     if level_counter == 0:
         bg = background_2
         level = level_1
+        COINCOUNT = 0
+        lives_left = 3
+
     elif level_counter == 1:
         bg = background_1
         level = level_2
+        COINCOUNT = 0
+        lives_left = 3
 
     create_level_sprites()
 
@@ -253,9 +258,11 @@ def start_screen():
 
 
 def game_over():
+    global level_counter
     fon = pygame.transform.scale(load_image('game_over.jpg'), (width, height))
     screen.blit(fon, (0, 0))
     while True:
+        mouse = pygame.mouse.get_pos()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -265,7 +272,7 @@ def game_over():
                     level_counter = 0
                     set_level(level_counter)
                     return start_screen()
-        mouse = pygame.mouse.get_pos()
+
         if width / 2.5 <= mouse[0] <= width / 2.5 + 140 and height / 1.1 <= mouse[1] <= height / 1.1 + 40:
             pygame.draw.rect(screen, color_light, [width / 2.5, height / 1.1, 140, 40])
 
@@ -277,6 +284,7 @@ def game_over():
 
 
 def win_level():
+    global level_counter
     fon = pygame.transform.scale(load_image('win_screen.png'), (width, height))
     screen.blit(fon, (0, 0))
     while True:
@@ -286,7 +294,14 @@ def win_level():
             # checks if a mouse is clicked
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if width / 2.5 <= mouse[0] <= width / 2.5 + 140 and height / 1.1 <= mouse[1] <= height / 1.1 + 40:
-                    return start_screen()
+                    if level_counter == 0:
+                        level_counter += 1
+                        set_level(level_counter)
+                        return
+                    if level_counter == 1:
+                        level_counter = 0
+                        set_level(level_counter)
+                        return
         mouse = pygame.mouse.get_pos()
         if width / 2.5 <= mouse[0] <= width / 2.5 + 140 and height / 1.1 <= mouse[1] <= height / 1.1 + 40:
             pygame.draw.rect(screen, color_light, [width / 2.5, height / 1.1, 140, 40])
@@ -337,11 +352,13 @@ class Player(sprite.Sprite):
 
     def move(self, left, right, up, platforms, is_extra_run, frame_delay):
         if left:
+            self.image = load_image('gosle.png')
             self.x_speed = -MOVE_SPEED  # Лево = x - n
             if is_extra_run:  # ускорение
                 self.x_speed -= EXTRA_SPEED  # ходьба-ускорение
 
         if right:
+            self.image = load_image('gose.png')
             self.x_speed = MOVE_SPEED  # Право = x + n
             if is_extra_run:  # ускорение
                 self.x_speed += EXTRA_SPEED  # ходьба-ускорение
@@ -349,10 +366,11 @@ class Player(sprite.Sprite):
         if up:
             if self.onGround:
                 self.y_speed -= JUMP_POWER
-                if is_extra_run and (left or right):  # ускорение и движение
+                if is_extra_run and (left or right): #and right:  # ускорение и движение
                     self.y_speed -= EXTRA_JUMP_POWER  # то прыжок с ускорением
 
-        if not (left or right):  # стоим
+
+        if not (left or right) and not is_extra_run:  # стоим
             self.x_speed = 0
         if not self.onGround:
             self.y_speed += GRAVITY
@@ -499,30 +517,30 @@ door_group = pygame.sprite.Group()  # портал
 monster_group = pygame.sprite.Group()  # монстр
 platforms = []
 
-pygame.mixer.music.load('data/game_music.mp3')
-pygame.mixer.music.play()
+#pygame.mixer.music.load('data/game_music.mp3')
+#pygame.mixer.music.play()
 level = []
-level_1 = ["-                                                                   -",
-           "-                                                                   -",
-           "-                                                                   -",
-           "-                                                                   -",
-           "-       $$                   $        *                             -",
-           "-      ----         --      ---             ---      $$             -",
-           "-                             --                   ----             -",
-           "-                       *                          M                -",
-           "-$                M                      $      ------              -",
-           "--       $      -----                  ----                         -",
-           "-       $ $   *                           *                         -",
-           "-       ---                      --                            $    -",
-           "- $                         M                              M  --    -",
-           "-                $        ----                 $ $        --- -     -",
-           "----                    ----                           -      -     -",
-           "-            -------                         --------         -  *  -",
-           "-          --                             **                  -  !  -",
-           "-        --                             ------                ---P---",
-           "-                     *                                          $ $-",
-           "-G                  -             $$                            $ $ -",
-           "---------------------------------------------------------------------"]
+level_1 = ["---                                                                   --",
+           "---                                                                   --",
+           "---                                                                   --",
+           "---                                                                   --",
+           "---       $$                   $        *                             --",
+           "---      ----         --      ---             ---      $$             --",
+           "---                             --                   ----             --",
+           "---                       *                          M                --",
+           "---$                M                      $      ------              --",
+           "----       $      -----                  ----                         --",
+           "--        $ $   *                           *                         --",
+           "---       ---                      --                            $    --",
+           "--  $                         M                              M  --    --",
+           "---                $        ----                 $ $        --- -     --",
+           "------                    ----                           -      -     --",
+           "--             -------                         --------         -  *  --",
+           "--           --                             **                  -  !  --",
+           "--         --                             ------                ---P----",
+           "--                      *                                          $ $--",
+           "-- G                  -             $$                            $ $ --",
+           "------------------------------------------------------------------------"]
 
 level_2 = [".                                                               .",
            ".                                                               .",
@@ -590,12 +608,12 @@ while is_running:
         COINCOUNT += 1
     if pygame.sprite.spritecollide(player, monster_group, True):
         game_over()
-    draw_text('score: ' + str(COINCOUNT), smallfont, 'white', PLATFORM_WIDTH, 20)
-    draw_text('lives_left: ' + str(lives_left), smallfont, 'white', PLATFORM_WIDTH, 60)
+
 
     player.move(left, right, up, platforms, is_extra_run, frame_delay)
     if lives_left == 0:
         game_over()
+        lives_left = 3
     if lives_left != 0 and pygame.sprite.spritecollide(player, door_group, True):
         win_level()
         level_counter += 1
@@ -603,6 +621,8 @@ while is_running:
 
     screen.blit(bg, (0, 0))  # Каждую итерацию необходимо всё перерисовывать
     all_sprites.draw(screen)
+    draw_text('score: ' + str(COINCOUNT), smallfont, 'white', PLATFORM_WIDTH, 20)
+    draw_text('lives_left: ' + str(lives_left), smallfont, 'white', PLATFORM_WIDTH, 60)
 
     pygame.display.update()  # обновление и вывод всех изменений на экран
     frame_delay = clock.tick(FPS) / 1000
