@@ -1,7 +1,6 @@
 from pygame import *
 import sys
 import os
-import math
 import pygame
 
 
@@ -42,7 +41,6 @@ back_button = smallfont.render('--back->', True, color)
 
 text_lev_1 = smallfont.render('level №1', True, color)
 text_lev_2 = smallfont.render('level №2', True, color)
-text_lev_3 = smallfont.render('level №3', True, color)
 restart_text = smallfont.render('try again', True, color)
 win_restart_text = smallfont.render('next level', True, color)
 all_win_text = smallfont.render('menu', True, color)
@@ -218,7 +216,6 @@ def start_screen():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-            # checks if a mouse is clicked
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if width / 2.5 <= mouse[0] <= width / 2.5 + 140 and height / 1.1 <= mouse[1] <= height / 1.1 + 40:
                     level_counter = 0
@@ -473,15 +470,17 @@ class Danger(sprite.Sprite):
         self.image = load_image(image)
         self.image.set_colorkey(Color(COLOR))
         self.rect = self.image.get_rect().move(x, y)
+        self.startX = x
+        self.startY = y
 
-    #def player_die(self):
-        #global
-        #time.delay(50)
-        #self.teleport(startX, startY)
+    # def player_die(self):
+    #     global lives_left
+    #     time.delay(50)
+    #     self.teleport(self.startX, self.startY)
 
-    #def teleport(self, moveX, moveY):
-       # self.rect.x = moveX
-        #self.rect.y = moveY
+    # def teleport(self, moveX, moveY):
+    #     self.rect.x = moveX
+    #     self.rect.y = moveY
 
 
 class Monster(sprite.Sprite):
@@ -517,30 +516,30 @@ door_group = pygame.sprite.Group()  # портал
 monster_group = pygame.sprite.Group()  # монстр
 platforms = []
 
-#pygame.mixer.music.load('data/game_music.mp3')
-#pygame.mixer.music.play()
-level = []
-level_1 = ["---                                                                   --",
-           "---                                                                   --",
-           "---                                                                   --",
-           "---                                                                   --",
-           "---       $$                   $        *                             --",
-           "---      ----         --      ---             ---      $$             --",
-           "---                             --                   ----             --",
-           "---                       *                          M                --",
-           "---$                M                      $      ------              --",
-           "----       $      -----                  ----                         --",
-           "--        $ $   *                           *                         --",
-           "---       ---                      --                            $    --",
-           "--  $                         M                              M  --    --",
-           "---                $        ----                 $ $        --- -     --",
-           "------                    ----                           -      -     --",
-           "--             -------                         --------         -  *  --",
-           "--           --                             **                  -  !  --",
-           "--         --                             ------                ---P----",
-           "--                      *                                          $ $--",
-           "-- G                  -             $$                            $ $ --",
-           "------------------------------------------------------------------------"]
+pygame.mixer.music.load('data/game_music.mp3')
+pygame.mixer.music.play(-1)
+
+level_1 = ["-                                                                   -",
+           "-                                                                   -",
+           "-                                                                   -",
+           "-                                                                   -",
+           "-       $$                   $        *                             -",
+           "-      ----         --      ---             ---      $$             -",
+           "-                             --                   ----             -",
+           "-                       *                          M                -",
+           "-$                M                      $      ------              -",
+           "--       $      -----                  ----                         -",
+           "-       $ $   *                           *                         -",
+           "-       ---                      --                            $    -",
+           "- $                         M                              M  --    -",
+           "-                $        ----                 $ $        --- -     -",
+           "----                    ----                           -      -     -",
+           "-            -------                         --------         -  *  -",
+           "-          --                             **                  -  !  -",
+           "-        --                             ------                ---P---",
+           "-                     *                                          $ $-",
+           "-G                  -             $$                            $ $ -",
+           "---------------------------------------------------------------------"]
 
 level_2 = [".                                                               .",
            ".                                                               .",
@@ -571,9 +570,12 @@ bg = background_1
 is_running = True
 frame_delay = 0
 pygame.time.set_timer(COIN_ANIMATION_EVENT, 200)
+flPause = False
+vol = 0.1
 
 set_level(level_counter)
 
+is_running = True
 while is_running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -596,6 +598,13 @@ while is_running:
             is_extra_run = True
         if event.type == COIN_ANIMATION_EVENT:
             coin_group.update(animation_tick=True)
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_RALT or event.key == pygame.K_LALT:
+                flPause = not flPause
+                if flPause:
+                    pygame.mixer.music.pause()
+                else:
+                    pygame.mixer.music.unpause()
 
     all_sprites.update()
 
