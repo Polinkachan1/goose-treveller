@@ -42,7 +42,6 @@ back_button = smallfont.render('--back->', True, color)
 
 text_lev_1 = smallfont.render('level №1', True, color)
 text_lev_2 = smallfont.render('level №2', True, color)
-text_lev_3 = smallfont.render('level №3', True, color)
 restart_text = smallfont.render('try again', True, color)
 win_restart_text = smallfont.render('next level', True, color)
 all_win_text = smallfont.render('menu', True, color)
@@ -140,28 +139,6 @@ def instruction():
         pygame.display.update()
 
 
-def wrong_message():
-    fon = pygame.transform.scale(load_image('wrong_message.png'), (width, height))
-    screen.blit(fon, (0, 0))
-
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-            if width / 1.2 <= mouse[0] <= width / 1.2 + 140 and height / 24 <= mouse[1] <= height / 24 + 40:
-                return start_screen()
-
-        mouse = pygame.mouse.get_pos()
-
-        if width / 1.2 <= mouse[0] <= width / 1.2 + 140 and height / 24 <= mouse[1] <= height / 24 + 40:
-            pygame.draw.rect(screen, color_light, [width / 1.2, height / 24, 150, 40])
-
-        else:
-            pygame.draw.rect(screen, color_dark, [width / 1.2, height / 24, 150, 40])
-        screen.blit(back_button, (width / 1.2 + 5, height / 24))
-        pygame.display.update()
-
-
 def change_level():
     global level_counter
     fon = pygame.transform.scale(load_image('picker_level.jpg'), (width, height))
@@ -186,13 +163,11 @@ def change_level():
                     return
 
         mouse = pygame.mouse.get_pos()
-        # second_button Instruction
         if width / 2.5 <= mouse[0] <= width / 2.5 + 200 and height / 3.5 <= mouse[1] <= height / 3.5 + 60:
             pygame.draw.rect(screen, color_light, [width / 2.5, height / 3.5, 200, 60])
         else:
             pygame.draw.rect(screen, color_dark, [width / 2.5, height / 3.5, 200, 60])
 
-        # third-button Choose level
         if width / 2.5 <= mouse[0] <= width / 2.5 + 200 and height / 2.5 <= mouse[1] <= height / 2.5 + 60:
             pygame.draw.rect(screen, color_light, [width / 2.5, height / 2.5, 200, 60])
 
@@ -213,7 +188,6 @@ def start_screen():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-            # checks if a mouse is clicked
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if width / 2.5 <= mouse[0] <= width / 2.5 + 140 and height / 1.1 <= mouse[1] <= height / 1.1 + 40:
                     level_counter = 0
@@ -259,7 +233,6 @@ def game_over():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-            # checks if a mouse is clicked
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if width / 2.5 <= mouse[0] <= width / 2.5 + 140 and height / 1.1 <= mouse[1] <= height / 1.1 + 40:
                     level_counter = 0
@@ -268,7 +241,6 @@ def game_over():
         mouse = pygame.mouse.get_pos()
         if width / 2.5 <= mouse[0] <= width / 2.5 + 140 and height / 1.1 <= mouse[1] <= height / 1.1 + 40:
             pygame.draw.rect(screen, color_light, [width / 2.5, height / 1.1, 140, 40])
-
         else:
             pygame.draw.rect(screen, color_dark, [width / 2.5, height / 1.1, 140, 40])
         screen.blit(restart_text, (width / 2.5 + 10, height / 1.1))
@@ -290,7 +262,6 @@ def win_level():
         mouse = pygame.mouse.get_pos()
         if width / 2.5 <= mouse[0] <= width / 2.5 + 140 and height / 1.1 <= mouse[1] <= height / 1.1 + 40:
             pygame.draw.rect(screen, color_light, [width / 2.5, height / 1.1, 140, 40])
-
         else:
             pygame.draw.rect(screen, color_dark, [width / 2.5, height / 1.1, 140, 40])
         if level_counter == 1:
@@ -390,7 +361,7 @@ class Player(sprite.Sprite):
         time.wait(500)
         self.teleport(self.startX, self.startY)
         lives_left -= 1
-
+        # game_over()
 
     def teleport(self, moveX, moveY):
         self.rect.x = moveX
@@ -425,13 +396,11 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self.rect = self.rect.move(x, y)
 
     def cut_sheet(self, sheet, columns, rows):
-        self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
-                                sheet.get_height() // rows)
+        self.rect = pygame.Rect(0, 0, sheet.get_width() // columns, sheet.get_height() // rows)
         for j in range(rows):
             for i in range(columns):
                 frame_location = (self.rect.w * i, self.rect.h * j)
-                self.frames.append(sheet.subsurface(pygame.Rect(
-                    frame_location, self.rect.size)))
+                self.frames.append(sheet.subsurface(pygame.Rect(frame_location, self.rect.size)))
 
     def update(self, animation_tick=False):
         if not animation_tick:
@@ -455,16 +424,17 @@ class Danger(sprite.Sprite):
         self.image = load_image(image)
         self.image.set_colorkey(Color(COLOR))
         self.rect = self.image.get_rect().move(x, y)
+        self.startX = x
+        self.startY = y
 
-    #def player_die(self):
-        #global
-        #time.delay(50)
-        #self.teleport(startX, startY)
+    # def player_die(self):
+    #     global lives_left
+    #     time.delay(50)
+    #     self.teleport(self.startX, self.startY)
 
-    #def teleport(self, moveX, moveY):
-       # self.rect.x = moveX
-        #self.rect.y = moveY
-
+    # def teleport(self, moveX, moveY):
+    #     self.rect.x = moveX
+    #     self.rect.y = moveY
 
 class Monster(sprite.Sprite):
     def __init__(self, x, y, image):
@@ -500,8 +470,8 @@ monster_group = pygame.sprite.Group()  # монстр
 platforms = []
 
 pygame.mixer.music.load('data/game_music.mp3')
-pygame.mixer.music.play()
-level = []
+pygame.mixer.music.play(-1)
+
 level_1 = ["-                                                                   -",
            "-                                                                   -",
            "-                                                                   -",
@@ -550,12 +520,13 @@ start_screen()
 camera = Camera()
 FPS = 60
 bg = background_1
-is_running = True
 frame_delay = 0
 pygame.time.set_timer(COIN_ANIMATION_EVENT, 200)
+flPause = False
 
 set_level(level_counter)
 
+is_running = True
 while is_running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -578,6 +549,13 @@ while is_running:
             is_extra_run = True
         if event.type == COIN_ANIMATION_EVENT:
             coin_group.update(animation_tick=True)
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                flPause = not flPause
+                if flPause:
+                    pygame.mixer.music.pause()
+                else:
+                    pygame.mixer.music.unpause()
 
     all_sprites.update()
 
@@ -604,6 +582,6 @@ while is_running:
     screen.blit(bg, (0, 0))  # Каждую итерацию необходимо всё перерисовывать
     all_sprites.draw(screen)
 
-    pygame.display.update()  # обновление и вывод всех изменений на экран
+    pygame.display.update()
     frame_delay = clock.tick(FPS) / 1000
 pygame.quit()
