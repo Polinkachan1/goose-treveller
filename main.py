@@ -266,7 +266,10 @@ def game_over():
                 if width / 2.5 <= mouse[0] <= width / 2.5 + 140 and height / 1.1 <= mouse[1] <= height / 1.1 + 40:
                     level_counter = 0
                     set_level(level_counter)
+                    main_p.set_volume(0)
+                    lose.play()
                     return start_screen()
+                    main_p.set_volume(50)
 
         if width / 2.5 <= mouse[0] <= width / 2.5 + 140 and height / 1.1 <= mouse[1] <= height / 1.1 + 40:
             pygame.draw.rect(screen, color_light, [width / 2.5, height / 1.1, 140, 40])
@@ -501,8 +504,8 @@ door_group = pygame.sprite.Group()  # портал
 monster_group = pygame.sprite.Group()  # монстр
 platforms = []
 
-pygame.mixer.music.load('game_music.mp3')
-pygame.mixer.music.play(-1)
+main_p = pygame.mixer.Sound('game_music.mp3')
+main_p.play(-1)
 
 level_1 = ["-                                                                   -",
            "-                                                                   -",
@@ -558,7 +561,7 @@ pygame.time.set_timer(COIN_ANIMATION_EVENT, 200)
 flPause = False
 vol = 0.1
 coin = pygame.mixer.Sound('data/catch_coin.mp3')
-
+lose = pygame.mixer.Sound('lose.mp3')
 set_level(level_counter)
 
 is_running = True
@@ -605,14 +608,15 @@ while is_running:
     if pygame.sprite.spritecollide(player, monster_group, True):
         game_over()
 
+
     player.move(left, right, up, platforms, is_extra_run, frame_delay)
     if lives_left == 0:
         game_over()
+
         lives_left = 3
     if lives_left != 0 and pygame.sprite.spritecollide(player, door_group, True):
         win_level()
-        #level_counter += 1
-        #set_level(level_counter)
+
 
     screen.blit(bg, (0, 0))  # Каждую итерацию необходимо всё перерисовывать
     all_sprites.draw(screen)
