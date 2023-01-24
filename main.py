@@ -17,7 +17,7 @@ PLATFORM_WIDTH = 32
 PLATFORM_HEIGHT = 32
 
 width = 800
-height = 670
+height = 665
 display = (width, height)
 pygame.init()
 screen = pygame.display.set_mode(display)
@@ -38,7 +38,6 @@ text_1 = smallfont.render('Start', True, color)
 text_2 = smallfont.render('Instruction', True, color)
 text_3 = smallfont.render('Choose level', True, color)
 back_button = smallfont.render('--back->', True, color)
-
 text_lev_1 = smallfont.render('level №1', True, color)
 text_lev_2 = smallfont.render('level №2', True, color)
 restart_text = smallfont.render('try again', True, color)
@@ -130,7 +129,6 @@ def instruction():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if width / 1.2 <= mouse[0] <= width / 1.2 + 140 and height / 24 <= mouse[1] <= height / 24 + 40:
                     return start_screen()
-
         mouse = pygame.mouse.get_pos()
 
         if width / 1.2 <= mouse[0] <= width / 1.2 + 140 and height / 24 <= mouse[1] <= height / 24 + 40:
@@ -139,7 +137,6 @@ def instruction():
         else:
             pygame.draw.rect(screen, color_dark, [width / 1.2, height / 24, 150, 40])
         screen.blit(back_button, (width / 1.2 + 5, height / 24))
-
         pygame.display.update()
 
 
@@ -250,7 +247,6 @@ def start_screen():
         screen.blit(text_1, (width / 2.5 + 40, height / 1.1))  # first button
         screen.blit(text_2, (width / 11 + 10, height / 1.1))  # second button
         screen.blit(text_3, (width / 1.5 + 2, height / 1.1))  # third button
-        # updates the frames of the game
         pygame.display.update()
 
 
@@ -302,7 +298,6 @@ def win_level():
         mouse = pygame.mouse.get_pos()
         if width / 2.5 <= mouse[0] <= width / 2.5 + 140 and height / 1.1 <= mouse[1] <= height / 1.1 + 40:
             pygame.draw.rect(screen, color_light, [width / 2.5, height / 1.1, 140, 40])
-
         else:
             pygame.draw.rect(screen, color_dark, [width / 2.5, height / 1.1, 140, 40])
         if level_counter == 1:
@@ -363,7 +358,7 @@ class Player(sprite.Sprite):
         if up:
             if self.onGround:
                 self.y_speed -= JUMP_POWER
-                if is_extra_run and (left or right):   # ускорение и движение
+                if is_extra_run and (left or right):  # ускорение и движение
                     self.y_speed -= EXTRA_JUMP_POWER  # прыжок с ускорением
 
         if not (left or right) and not is_extra_run:  # стоим
@@ -382,8 +377,8 @@ class Player(sprite.Sprite):
             if pygame.sprite.collide_rect(self, p):
                 if isinstance(p, Danger) or isinstance(p, Monster):  # если пересекаемый блок - Danger или Monster
                     self.death()
-                # elif isinstance(p, End_portal):
-                # self.teleport(self.startX, self.startY)
+                elif isinstance(p, End_portal):
+                    self.teleport(self.startX, self.startY)
 
                 else:
                     if x_speed > 0:
@@ -394,7 +389,6 @@ class Player(sprite.Sprite):
                         self.rect.bottom = p.rect.top
                         self.onGround = True
                         self.y_speed = 0
-
                     elif y_speed < 0:
                         self.rect.top = p.rect.bottom
                         self.y_speed = 0
@@ -404,7 +398,6 @@ class Player(sprite.Sprite):
         time.wait(500)
         self.teleport(self.startX, self.startY)
         lives_left -= 1
-
 
     def teleport(self, moveX, moveY):
         self.rect.x = moveX
@@ -571,6 +564,7 @@ frame_delay = 0
 pygame.time.set_timer(COIN_ANIMATION_EVENT, 200)
 flPause = False
 vol = 0.1
+coin = pygame.mixer.Sound('data/catch_coin.mp3')
 
 set_level(level_counter)
 
@@ -613,10 +607,10 @@ while is_running:
         camera.apply(sprite)
     # проверка того, была ли собрана монетка
     if pygame.sprite.spritecollide(player, coin_group, True):
+        coin.play()
         COINCOUNT += 1
     if pygame.sprite.spritecollide(player, monster_group, True):
         game_over()
-
 
     player.move(left, right, up, platforms, is_extra_run, frame_delay)
     if lives_left == 0:
