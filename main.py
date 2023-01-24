@@ -178,11 +178,13 @@ def change_level():
                     # need to add first level
                     level_counter = 1
                     set_level(level_counter)
+                    print(level_counter)
                     return
 
                 elif width / 2.5 <= mouse[0] <= width / 2.5 + 200 and height / 3.5 <= mouse[1] <= height / 3.5 + 60:
                     level_counter = 0
                     set_level(level_counter)
+                    print(level_counter)
                     return
 
         mouse = pygame.mouse.get_pos()
@@ -294,7 +296,7 @@ def win_level():
                     if level_counter == 1:
                         level_counter = 0
                         set_level(level_counter)
-                        return
+                        return start_screen()
         mouse = pygame.mouse.get_pos()
         if width / 2.5 <= mouse[0] <= width / 2.5 + 140 and height / 1.1 <= mouse[1] <= height / 1.1 + 40:
             pygame.draw.rect(screen, color_light, [width / 2.5, height / 1.1, 140, 40])
@@ -465,15 +467,6 @@ class Danger(sprite.Sprite):
         self.startX = x
         self.startY = y
 
-    # def player_die(self):
-    #     global lives_left
-    #     time.delay(50)
-    #     self.teleport(self.startX, self.startY)
-
-    # def teleport(self, moveX, moveY):
-    #     self.rect.x = moveX
-    #     self.rect.y = moveY
-
 
 class Monster(sprite.Sprite):
     def __init__(self, x, y, image):
@@ -508,7 +501,7 @@ door_group = pygame.sprite.Group()  # портал
 monster_group = pygame.sprite.Group()  # монстр
 platforms = []
 
-pygame.mixer.music.load('data/game_music.mp3')
+pygame.mixer.music.load('game_music.mp3')
 pygame.mixer.music.play(-1)
 
 level_1 = ["-                                                                   -",
@@ -530,30 +523,30 @@ level_1 = ["-                                                                   
            "-          --                             **                  -  !  -",
            "-        --                             ------                ---P---",
            "-                     *                                          $ $-",
-           "-G                  -             $$                            $ $ -",
+           "-G     !             -             $$                            $ $ -",
            "---------------------------------------------------------------------"]
 
-level_2 = [".                                                               .",
-           ".                                                               .",
-           ".          ...                          M                       .",
-           ".   $$                               ......                     .",
-           ".   $$            *    $ $       *                $             .",
-           ".  ...                ....     ...               $ $            .",
-           ".                                                ...            .",
-           ".$                                                              .",
-           "..          **                 $$                               .",
-           ".                            ......                             .",
-           ".                                                               .",
-           ".      $                              ...                       .",
-           ".     ...         M          *                                **.",
-           ".               .....                                           .",
-           ".          ...                       M                     !    .",
-           ".   ........                      ........             ..........",
-           ".  .                             ... $ ....                 $ $ .",
-           ".                            ....... $ .....               $ $ $.",
-           ".            **                  ...   ......              ......",
-           ".G       .      $                       $.....            .......",
-           "................................................................."]
+level_2 = [".                                                                   .",
+           ".                                                                   .",
+           ".          ...                          M                  $ $      .",
+           ".   $$                               ......           *   ....      .",
+           ".   $$            *    $ $       *                $   ..            .",
+           ".  ...                ....     ...               $ $                .",
+           ".                                                ...                .",
+           ".$                                                                  .",
+           "..          **                 $$                                   .",
+           ".                            ......                                 .",
+           ".                                                                   .",
+           ".      $                              ...                           .",
+           ".     ...         M          *                                    **.",
+           ".               .....                                               .",
+           ".          ...                       M          **             !    .",
+           ".   ........                      ........                 ..........",
+           ".  .                             ... $ ....                     $ $ .",
+           ".                            ....... $ .....                   $ $ $.",
+           ".            **                  ...   ......        ..        ......",
+           ".G     ! .      $                       $.....      ....      .......",
+           "....................................................................."]
 
 start_screen()
 camera = Camera()
@@ -618,8 +611,8 @@ while is_running:
         lives_left = 3
     if lives_left != 0 and pygame.sprite.spritecollide(player, door_group, True):
         win_level()
-        level_counter += 1
-        set_level(level_counter)
+        #level_counter += 1
+        #set_level(level_counter)
 
     screen.blit(bg, (0, 0))  # Каждую итерацию необходимо всё перерисовывать
     all_sprites.draw(screen)
