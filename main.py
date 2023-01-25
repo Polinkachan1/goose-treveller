@@ -178,13 +178,11 @@ def change_level():
                     # need to add first level
                     level_counter = 1
                     set_level(level_counter)
-                    print(level_counter)
                     return
 
                 elif width / 2.5 <= mouse[0] <= width / 2.5 + 200 and height / 3.5 <= mouse[1] <= height / 3.5 + 60:
                     level_counter = 0
                     set_level(level_counter)
-                    print(level_counter)
                     return
 
         mouse = pygame.mouse.get_pos()
@@ -195,14 +193,14 @@ def change_level():
             pygame.draw.rect(screen, color_dark, [width / 2.5, height / 3.5, 200, 60])
 
         # third-button Choose level
-        if width / 2.5 <= mouse[0] <= width / 2.5 + 200 and height / 2.5 <= mouse[1] <= height / 2.5 + 60:
-            pygame.draw.rect(screen, color_light, [width / 2.5, height / 2.5, 200, 60])
+        if width / 2.5 <= mouse[0] <= width / 2.5 + 200 and height / 2 <= mouse[1] <= height / 2 + 60:
+            pygame.draw.rect(screen, color_light, [width / 2.5, height / 2, 200, 60])
 
         else:
-            pygame.draw.rect(screen, color_dark, [width / 2.5, height / 2.5, 200, 60])
+            pygame.draw.rect(screen, color_dark, [width / 2.5, height / 2, 200, 60])
         # superimposing the text onto our button
         screen.blit(text_lev_1, (width / 2.5 + 20, height / 3.5 + 10))  # first button
-        screen.blit(text_lev_2, (width / 2.5 + 20, height / 2.5 + 10))  # second button
+        screen.blit(text_lev_2, (width / 2.5 + 20, height / 2 + 10))  # second button
         pygame.display.update()
 
 
@@ -226,6 +224,7 @@ def start_screen():
 
                 elif width / 1.5 <= mouse[0] <= width / 1.5 + 140 and height / 1.1 <= mouse[1] <= height / 1.1 + 40:
                     return change_level()
+
 
         # if mouse is hovered on a button it changes to lighter shade
         if width / 2.5 <= mouse[0] <= width / 2.5 + 140 and height / 1.1 <= mouse[1] <= height / 1.1 + 40:
@@ -278,6 +277,8 @@ def game_over():
             pygame.draw.rect(screen, color_dark, [width / 2.5, height / 1.1, 140, 40])
         screen.blit(restart_text, (width / 2.5 + 5, height / 1.1))
         draw_text('score: ' + str(COINCOUNT), smallfont, 'white', width / 2.5, height / 1.5)
+        with open("scores.txt", 'w', encoding='utf-8') as f:
+            f.write(str(COINCOUNT))
         pygame.display.update()
 
 
@@ -302,7 +303,7 @@ def win_level():
                     if level_counter == 1:
                         level_counter = 0
                         set_level(level_counter)
-                        return start_screen()
+                        return wrong_message()
 
         if width / 2.5 <= mouse[0] <= width / 2.5 + 140 and height / 1.1 <= mouse[1] <= height / 1.1 + 40:
             pygame.draw.rect(screen, color_light, [width / 2.5, height / 1.1, 140, 40])
@@ -313,6 +314,7 @@ def win_level():
         else:
             screen.blit(win_restart_text, (width / 2.5 + 5, height / 1.1))
         draw_text('score: ' + str(COINCOUNT), smallfont, 'white', width / 2.5, height / 1.5)
+
         pygame.display.update()
 
 
@@ -507,6 +509,9 @@ door_group = pygame.sprite.Group()  # портал
 monster_group = pygame.sprite.Group()  # монстр
 platforms = []
 
+pygame.mixer.music.load('music/game_music.mp3')
+pygame.mixer.music.play(-1)
+
 level_1 = ["-                                                                   -",
            "-                                                                   -",
            "-                                                                   -",
@@ -526,7 +531,7 @@ level_1 = ["-                                                                   
            "-          --                             **                  -  !  -",
            "-        --                             ------                ---P---",
            "-                     *                                          $ $-",
-           "-G                   -             $$                            $ $ -",
+           "-G     !             -             $$                            $ $ -",
            "---------------------------------------------------------------------"]
 
 level_2 = [".                                                                   .",
@@ -548,21 +553,21 @@ level_2 = [".                                                                   
            ".  .                             ... $ ....                     $ $ .",
            ".                            ....... $ .....                   $ $ $.",
            ".            **                  ...   ......        ..        ......",
-           ".G       .      $                       $.....      ....      .......",
+           ".G     ! .      $                       $.....      ....      .......",
            "....................................................................."]
 
 start_screen()
 camera = Camera()
 FPS = 60
 bg = background_1
+is_running = True
 frame_delay = 0
 pygame.time.set_timer(COIN_ANIMATION_EVENT, 200)
 flPause = False
-pygame.mixer.music.load('music/game_music.mp3')
-pygame.mixer.music.play(-1)
+vol = 0.1
 coin = pygame.mixer.Sound('music/catch_coin.mp3')
-lose = pygame.mixer.Sound('music/music_lose.mp3')
-winner = pygame.mixer.Sound('music/music_winner.mp3')
+lose = pygame.mixer.Sound('music/lose.mp3')
+winner = pygame.mixer.Sound('music/winner.mp3')
 set_level(level_counter)
 
 is_running = True
@@ -618,7 +623,11 @@ while is_running:
         lives_left = 3
     if lives_left != 0 and pygame.sprite.spritecollide(player, door_group, True):
         winner.play()
+        with open("scorer.txt", 'w', encoding='utf-8') as f:
+            fail = f.write(str(COINCOUNT))
+            print(COINCOUNT)
         win_level()
+
 
     screen.blit(bg, (0, 0))  # Каждую итерацию необходимо всё перерисовывать
     all_sprites.draw(screen)
