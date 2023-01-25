@@ -227,7 +227,6 @@ def start_screen():
                 elif width / 1.5 <= mouse[0] <= width / 1.5 + 140 and height / 1.1 <= mouse[1] <= height / 1.1 + 40:
                     return change_level()
 
-
         # if mouse is hovered on a button it changes to lighter shade
         if width / 2.5 <= mouse[0] <= width / 2.5 + 140 and height / 1.1 <= mouse[1] <= height / 1.1 + 40:
             pygame.draw.rect(screen, color_light, [width / 2.5, height / 1.1, 140, 40])
@@ -261,7 +260,6 @@ def game_over():
         mouse = pygame.mouse.get_pos()
         pygame.mixer.music.pause()
 
-
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -272,7 +270,6 @@ def game_over():
                     set_level(level_counter)
                     pygame.mixer.music.play()
                     return start_screen()
-
 
         if width / 2.5 <= mouse[0] <= width / 2.5 + 140 and height / 1.1 <= mouse[1] <= height / 1.1 + 40:
             pygame.draw.rect(screen, color_light, [width / 2.5, height / 1.1, 140, 40])
@@ -510,9 +507,6 @@ door_group = pygame.sprite.Group()  # портал
 monster_group = pygame.sprite.Group()  # монстр
 platforms = []
 
-pygame.mixer.music.load('music/game_music.mp3')
-pygame.mixer.music.play(-1)
-
 level_1 = ["-                                                                   -",
            "-                                                                   -",
            "-                                                                   -",
@@ -532,7 +526,7 @@ level_1 = ["-                                                                   
            "-          --                             **                  -  !  -",
            "-        --                             ------                ---P---",
            "-                     *                                          $ $-",
-           "-G     !             -             $$                            $ $ -",
+           "-G                   -             $$                            $ $ -",
            "---------------------------------------------------------------------"]
 
 level_2 = [".                                                                   .",
@@ -554,21 +548,21 @@ level_2 = [".                                                                   
            ".  .                             ... $ ....                     $ $ .",
            ".                            ....... $ .....                   $ $ $.",
            ".            **                  ...   ......        ..        ......",
-           ".G     ! .      $                       $.....      ....      .......",
+           ".G       .      $                       $.....      ....      .......",
            "....................................................................."]
 
 start_screen()
 camera = Camera()
 FPS = 60
 bg = background_1
-is_running = True
 frame_delay = 0
 pygame.time.set_timer(COIN_ANIMATION_EVENT, 200)
 flPause = False
-vol = 0.1
+pygame.mixer.music.load('music/game_music.mp3')
+pygame.mixer.music.play(-1)
 coin = pygame.mixer.Sound('music/catch_coin.mp3')
-lose = pygame.mixer.Sound('music/lose.mp3')
-winner = pygame.mixer.Sound('music/winner.mp3')
+lose = pygame.mixer.Sound('music/music_lose.mp3')
+winner = pygame.mixer.Sound('music/music_winner.mp3')
 set_level(level_counter)
 
 is_running = True
