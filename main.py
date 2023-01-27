@@ -25,7 +25,6 @@ pygame.display.set_caption('Goose-adventurer')
 
 background_1 = load_image('simple_blue_fon.jpg')
 background_2 = load_image('fon.png')
-# background_3 = load_image('desert_broun.jpg')
 
 clock = pygame.time.Clock()
 # all for start_screen
@@ -113,9 +112,9 @@ def create_level_sprites():
                 player = Player(x, y)
                 all_sprites.add(player)
 
-            x += PLATFORM_WIDTH  # блоки платформы ставятся на ширине блоков
-        y += PLATFORM_HEIGHT  # то же самое и с высотой
-        x = 0  # на каждой новой строчке начинаем с нуля
+            x += PLATFORM_WIDTH
+        y += PLATFORM_HEIGHT
+        x = 0
 
 
 def instruction():
@@ -224,7 +223,6 @@ def start_screen():
 
                 elif width / 1.5 <= mouse[0] <= width / 1.5 + 140 and height / 1.1 <= mouse[1] <= height / 1.1 + 40:
                     return change_level()
-
 
         # if mouse is hovered on a button it changes to lighter shade
         if width / 2.5 <= mouse[0] <= width / 2.5 + 140 and height / 1.1 <= mouse[1] <= height / 1.1 + 40:
@@ -389,7 +387,6 @@ class Player(sprite.Sprite):
                     self.death()
                 elif isinstance(p, End_portal):
                     self.teleport(self.startX, self.startY)
-
                 else:
                     if x_speed > 0:
                         self.rect.right = p.rect.left
@@ -531,7 +528,7 @@ level_1 = ["-                                                                   
            "-          --                             **                  -  !  -",
            "-        --                             ------                ---P---",
            "-                     *                                          $ $-",
-           "-G     !             -             $$                            $ $ -",
+           "-G                  -             $$                            $ $ -",
            "---------------------------------------------------------------------"]
 
 level_2 = [".                                                                   .",
@@ -553,14 +550,13 @@ level_2 = [".                                                                   
            ".  .                             ... $ ....                     $ $ .",
            ".                            ....... $ .....                   $ $ $.",
            ".            **                  ...   ......        ..        ......",
-           ".G     ! .      $                       $.....      ....      .......",
+           ".G       .      $                       $.....      ....      .......",
            "....................................................................."]
 
 start_screen()
 camera = Camera()
 FPS = 60
 bg = background_1
-is_running = True
 frame_delay = 0
 pygame.time.set_timer(COIN_ANIMATION_EVENT, 200)
 flPause = False
@@ -602,7 +598,6 @@ while is_running:
                     pygame.mixer.music.unpause()
 
     all_sprites.update()
-
     camera.update(player)
     monster_group.update()
     for sprite in all_sprites:
@@ -624,16 +619,15 @@ while is_running:
     if lives_left != 0 and pygame.sprite.spritecollide(player, door_group, True):
         winner.play()
         with open("scorer.txt", 'w', encoding='utf-8') as f:
-            fail = f.write(str(COINCOUNT))
+            file = f.write(str(COINCOUNT))
             print(COINCOUNT)
         win_level()
 
-
-    screen.blit(bg, (0, 0))  # Каждую итерацию необходимо всё перерисовывать
+    screen.blit(bg, (0, 0))
     all_sprites.draw(screen)
     draw_text('score: ' + str(COINCOUNT), smallfont, 'white', PLATFORM_WIDTH, 20)
     draw_text('lives_left: ' + str(lives_left), smallfont, 'white', PLATFORM_WIDTH, 60)
 
-    pygame.display.update()  # обновление и вывод всех изменений на экран
+    pygame.display.update()
     frame_delay = clock.tick(FPS) / 1000
 pygame.quit()
